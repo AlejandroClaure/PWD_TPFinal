@@ -1,4 +1,6 @@
 <?php
+include_once __DIR__ . '/Rol.php'; // Clase Rol
+include_once __DIR__ . '/conector/BaseDatos.php'; // Clase BaseDatos
 
 class Usuario extends BaseDatos {
 
@@ -9,6 +11,9 @@ class Usuario extends BaseDatos {
     private $usdeshabilitado;
     private $mensajeoperacion;
 
+    // Array de objetos Rol
+    private $roles;
+
     public function __construct() {
         parent::__construct();
         $this->idusuario = "";
@@ -17,8 +22,12 @@ class Usuario extends BaseDatos {
         $this->usmail = "";
         $this->usdeshabilitado = 0;
         $this->mensajeoperacion = "";
+        $this->roles = [];
     }
 
+    // ============================================================
+    // SETEAR
+    // ============================================================
     public function setear($idusuario, $usnombre, $uspass, $usmail, $usdeshabilitado) {
         $this->setIdUsuario($idusuario);
         $this->setUsNombre($usnombre);
@@ -30,7 +39,6 @@ class Usuario extends BaseDatos {
     // ============================================================
     // GETTERS Y SETTERS
     // ============================================================
-
     public function getIdUsuario() { return $this->idusuario; }
     public function setIdUsuario($idusuario) { $this->idusuario = $idusuario; }
 
@@ -50,6 +58,33 @@ class Usuario extends BaseDatos {
     public function setMensajeOperacion($valor) { $this->mensajeoperacion = $valor; }
 
     // ============================================================
+    // ROLES
+    // ============================================================
+    public function getRoles() { return $this->roles; }
+    public function setRoles($roles) { $this->roles = $roles; }
+
+    public function cargarRoles() {
+        $this->roles = [];
+        $sql = "SELECT r.idrol, r.rodescripcion 
+                FROM rol r 
+                INNER JOIN usuariorol ur ON r.idrol = ur.idrol
+                WHERE ur.idusuario = " . $this->getIdUsuario();
+
+        if ($this->Iniciar()) {
+            $res = $this->Ejecutar($sql);
+            if ($res > 0) {
+                while ($row = $this->Registro()) {
+                    $rol = new Rol();
+                    $rol->setear($row['idrol'], $row['rodescripcion']);
+                    $this->roles[] = $rol;
+                }
+            }
+        } else {
+            $this->setMensajeOperacion("Usuario->cargarRoles: " . $this->getError());
+        }
+    }
+
+    // ============================================================
     // CARGAR UNO
     // ============================================================
     public function cargar() {
@@ -58,7 +93,6 @@ class Usuario extends BaseDatos {
 
         if ($this->Iniciar()) {
             $res = $this->Ejecutar($sql);
-
             if ($res > 0) {
                 $row = $this->Registro();
                 $this->setear(
@@ -69,6 +103,9 @@ class Usuario extends BaseDatos {
                     $row['usdeshabilitado']
                 );
                 $resp = true;
+
+                // ⚡ Cargar roles asociados
+                $this->cargarRoles();
             }
         } else {
             $this->setMensajeOperacion("Usuario->cargar: " . $this->getError());
@@ -81,14 +118,11 @@ class Usuario extends BaseDatos {
     // ============================================================
     public function insertar() {
         $resp = false;
-        
         $sql = "INSERT INTO usuario (usnombre, uspass, usmail, usdeshabilitado)
-                VALUES (
-                    '" . $this->getUsNombre() . "', 
-                    '" . $this->getUsPass() . "', 
-                    '" . $this->getUsMail() . "', 
-                    NULL
-                );";
+                VALUES ('" . $this->getUsNombre() . "', 
+                        '" . $this->getUsPass() . "', 
+                        '" . $this->getUsMail() . "', 
+                        NULL);";
 
         if ($this->Iniciar()) {
             if ($id = $this->Ejecutar($sql)) {
@@ -146,14 +180,12 @@ class Usuario extends BaseDatos {
     public function listar($parametro = "") {
         $arreglo = [];
         $sql = "SELECT * FROM usuario ";
-        
         if ($parametro != "") {
             $sql .= " WHERE $parametro";
         }
 
         if ($this->Iniciar()) {
             $res = $this->Ejecutar($sql);
-
             if ($res > 0) {
                 while ($row = $this->Registro()) {
                     $obj = new Usuario();
@@ -164,6 +196,7 @@ class Usuario extends BaseDatos {
                         $row['usmail'],
                         $row['usdeshabilitado']
                     );
+                    $obj->cargarRoles();
                     $arreglo[] = $obj;
                 }
             }
@@ -172,11 +205,10 @@ class Usuario extends BaseDatos {
     }
 
     // ============================================================
-    // BUSCAR (DEVUELVE ARRAY, NO BOOLEAN)
+    // BUSCAR (DEVUELVE ARRAY)
     // ============================================================
     public function buscar($param) {
         $where = " true ";
-
         if (isset($param['idusuario'])) {
             $where .= " AND idusuario = " . $param['idusuario'];
         }
@@ -190,28 +222,8 @@ class Usuario extends BaseDatos {
             $where .= " AND uspass = '" . $param['uspass'] . "'";
         }
 
-        $sql = "SELECT * FROM usuario WHERE " . $where;
-
-        $lista = [];
-
-        if ($this->Iniciar()) {
-            $res = $this->Ejecutar($sql);
-
-            if ($res > 0) {
-                while ($row = $this->Registro()) {
-                    $obj = new Usuario();
-                    $obj->setear(
-                        $row['idusuario'],
-                        $row['usnombre'],
-                        $row['uspass'],
-                        $row['usmail'],
-                        $row['usdeshabilitado']
-                    );
-                    $lista[] = $obj;
-                }
-            }
-        }
-        return $lista;
+        $obj = new Usuario();
+        return $obj->listar($where);
     }
 
 }

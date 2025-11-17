@@ -1,10 +1,13 @@
 <?php
+// Incluimos todas las clases necesarias
+include_once __DIR__ . '/AbmUsuario.php';
+include_once __DIR__ . '/../Modelo/Usuario.php';
+include_once __DIR__ . '/../Modelo/Rol.php';
+include_once __DIR__ . '/AbmUsuarioRol.php';
 
 class Session
 {
-
     private $usuario;
-    private $rol;
 
     public function __construct()
     {
@@ -12,13 +15,18 @@ class Session
             session_start();
         }
 
-        // Si existe la sesión, cargo el usuario
+        // Si ya existe sesión, cargo usuario y roles
         if (isset($_SESSION['idusuario'])) {
             $abmUsuario = new AbmUsuario();
-            $usuario = $abmUsuario->buscar(['idusuario' => $_SESSION['idusuario']]);
+            $usuarios = $abmUsuario->buscar(['idusuario' => $_SESSION['idusuario']]);
+            if (!empty($usuarios)) {
+                $this->usuario = $usuarios[0];
 
-            if (!empty($usuario)) {
-                $this->usuario = $usuario[0];
+                // Cargar roles como array de datos para sesión
+                $this->usuario->cargarRoles();
+                $_SESSION['roles'] = array_map(function($rol) {
+                    return $rol->getRoDescripcion();
+                }, $this->usuario->getRoles());
             }
         }
     }
@@ -29,35 +37,26 @@ class Session
     public function iniciar($nombreUsuario, $psw)
     {
         $abmUsuario = new AbmUsuario();
+        $usuarios = $abmUsuario->buscar(['usnombre' => $nombreUsuario]);
 
-        // Buscar usuario por nombre
-        $usuario = $abmUsuario->buscar(['usnombre' => $nombreUsuario]);
+        if (!empty($usuarios)) {
+            $usuario = $usuarios[0];
 
-        if (!empty($usuario)) {
-            $usuario = $usuario[0];
-
-            // Comparar contraseña
             if (password_verify($psw, $usuario->getUsPass())) {
-
                 $_SESSION['idusuario'] = $usuario->getIdUsuario();
                 $this->usuario = $usuario;
 
-                // CARGAR ROLES 
-                $abmUsuarioRol = new AbmUsuarioRol();
-                $rolesUsuario = $abmUsuarioRol->rolesDeUsuario($usuario->getIdUsuario());
-
-                $_SESSION['roles'] = [];
-                foreach ($rolesUsuario as $rol) {
-                    $_SESSION['roles'][] = $rol->getRoDescripcion(); // ejemplo: "admin"
-                }
+                // Cargar roles y guardar solo descripciones en sesión (string)
+                $usuario->cargarRoles();
+                $_SESSION['roles'] = array_map(function($rol) {
+                    return $rol->getRoDescripcion();
+                }, $usuario->getRoles());
 
                 return true;
             }
         }
-
         return false;
     }
-
 
     /**
      * Valida si la sesión está activa
@@ -65,6 +64,14 @@ class Session
     public function validar()
     {
         return isset($_SESSION['idusuario']);
+    }
+
+    /**
+     * Alias de validar() para compatibilidad con paginaSegura.php
+     */
+    public function activa()
+    {
+        return $this->validar();
     }
 
     /**
@@ -76,7 +83,7 @@ class Session
     }
 
     /**
-     * Cerrar sesión
+     * Cierra sesión
      */
     public function cerrar()
     {
@@ -85,17 +92,11 @@ class Session
         $this->usuario = null;
     }
 
-
-    public function activa()
-    {
-        return isset($_SESSION['idusuario']);
-    }
-
     /**
-     * método para verificar roles
+     * Verifica si el usuario tiene determinado rol
      */
-    public function tieneRol($rol)
+    public function tieneRol($rolDescripcion)
     {
-        return isset($_SESSION['roles']) && in_array($rol, $_SESSION['roles']);
+        return isset($_SESSION['roles']) && in_array($rolDescripcion, $_SESSION['roles']);
     }
 }
