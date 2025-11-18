@@ -11,9 +11,9 @@ if (!$session->activa()) {
 $usuario = $session->getUsuario();
 $roles = $_SESSION['roles'] ?? [];
 
-// Obtener menús disponibles
+// Obtener menús dinámicos según roles
 $abmMenu = new AbmMenu();
-$menus = $abmMenu->obtenerMenuPorUsuario($usuario->getIdUsuario());
+$menus = $abmMenu->obtenerMenuPorRoles($roles);
 
 include_once "../estructura/cabecera.php";
 ?>
@@ -21,7 +21,7 @@ include_once "../estructura/cabecera.php";
 <div class="container mt-5">
 
     <h2 class="mb-3">
-        Bienvenido, <?= $usuario->getUsNombre(); ?> 👋
+        Bienvenido, <?= htmlspecialchars($usuario->getUsNombre()); ?> 👋
     </h2>
 
     <p class="text-muted">
@@ -30,11 +30,12 @@ include_once "../estructura/cabecera.php";
 
     <hr>
 
+    <!-- ACCESOS RÁPIDOS COMO ANTES -->
     <h4 class="mt-4">Accesos rápidos</h4>
 
     <div class="row mt-3">
 
-        <!-- ACCESO PARA ADMIN -->
+        <!-- ADMIN -->
         <?php if (in_array("admin", $roles)): ?>
             <div class="col-md-4 mb-3">
                 <div class="card shadow-sm">
@@ -47,7 +48,7 @@ include_once "../estructura/cabecera.php";
             </div>
         <?php endif; ?>
 
-        <!-- ACCESO PARA VENDEDOR -->
+        <!-- VENDEDOR -->
         <?php if (in_array("vendedor", $roles)): ?>
             <div class="col-md-4 mb-3">
                 <div class="card shadow-sm">
@@ -60,7 +61,7 @@ include_once "../estructura/cabecera.php";
             </div>
         <?php endif; ?>
 
-        <!-- ACCESO PARA CLIENTE -->
+        <!-- CLIENTE -->
         <?php if (in_array("cliente", $roles)): ?>
             <div class="col-md-4 mb-3">
                 <div class="card shadow-sm">
@@ -75,8 +76,8 @@ include_once "../estructura/cabecera.php";
 
     </div>
 
-    <!-- SECCIÓN DE MENÚS DEL SISTEMA -->
-    <h4 class="mt-5">Menús disponibles</h4>
+    <!-- MENÚS DINÁMICOS -->
+    <h4 class="mt-5">Menús del sistema según tu rol</h4>
 
     <div class="row mt-3">
         <?php if (empty($menus)): ?>
@@ -87,10 +88,11 @@ include_once "../estructura/cabecera.php";
             <div class="col-md-4 mb-3">
                 <div class="card shadow-sm">
                     <div class="card-body">
+
                         <h5 class="card-title"><?= $menu->getMeNombre(); ?></h5>
                         <p class="card-text"><?= $menu->getMeDescripcion(); ?></p>
 
-                        <?php if ($menu->getMeLink() != ""): ?>
+                        <?php if (!empty($menu->getMeLink())): ?>
                             <a href="<?= $menu->getMeLink(); ?>" class="btn btn-outline-primary w-100">
                                 Ir al menú
                             </a>

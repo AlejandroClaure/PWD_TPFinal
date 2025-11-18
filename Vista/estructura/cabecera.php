@@ -1,23 +1,22 @@
 <?php
 include_once dirname(__DIR__, 2) . '/configuracion.php';
 
-// Iniciar sesión solo si aún no existe
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+   session_start();
 }
 
-// Crear manejador de sesión
 $session = new Session();
-$usuario = $session->getUsuario(); // usuario logueado o null
+$usuario = $session->getUsuario();
 
-// Obtener roles del usuario logueado (si lo hay)
 $rolesUsuario = [];
 if ($usuario) {
-    $rolesUsuario = (new AbmUsuarioRol())->rolesDeUsuario($usuario->getIdUsuario());
+   // Esto devuelve strings (“admin”, “cliente”, …)
+   $rolesUsuario = (new AbmUsuarioRol())->rolesDeUsuario($usuario->getIdUsuario());
 }
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,79 +32,138 @@ if ($usuario) {
 </head>
 
 <body>
-<header>
-   <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm fixed-top">
-      <div class="container">
 
-         <!-- Logo -->
-         <a class="navbar-brand logo" href="<?= $GLOBALS['BASE_URL']; ?>">
-            <img src="<?= $GLOBALS['IMG_URL']; ?>logo.png"
-                 alt="Logo" width="50" height="50"
-                 class="me-1 rounded-circle">
-            Tienda Online
-         </a>
+   <header>
+      <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm fixed-top">
+         <div class="container">
 
-         <!-- Botón menú responsive -->
-         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                 data-bs-target="#navbarNav1">
-            <span class="navbar-toggler-icon"></span>
-         </button>
+            <!-- Logo -->
+            <a class="navbar-brand logo" href="<?= $GLOBALS['BASE_URL']; ?>">
+               <img src="<?= $GLOBALS['IMG_URL']; ?>logo.png"
+                  alt="Logo" width="50" height="50"
+                  class="me-1 rounded-circle">
+               Tienda Online
+            </a>
 
-         <div class="collapse navbar-collapse" id="navbarNav1">
-            <ul class="navbar-nav ms-auto">
+            <!-- Botón menú responsive -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+               data-bs-target="#navbarNav1">
+               <span class="navbar-toggler-icon"></span>
+            </button>
 
-               <li class="nav-item">
-                  <a class="nav-link" href="<?= $GLOBALS['VISTA_URL']; ?>producto/producto.php">Productos</a>
-               </li>
+            <div class="collapse navbar-collapse" id="navbarNav1">
+               <ul class="navbar-nav ms-auto">
+                  <?php
+                  if ($usuario) {
+                     $abmMenu = new AbmMenu();
+                     $menus = $abmMenu->obtenerMenuPorRoles($rolesUsuario);
 
-               <li class="nav-item">
-                  <a class="nav-link" href="<?= $GLOBALS['VISTA_URL']; ?>compra/carrito.php">Carrito</a>
-               </li>
+                     // Agrupar por padre
+                     $menusPadre = array_filter($menus, fn($m) => $m->getIdPadre() === null);
+                     $menusHijos = [];
 
-               <li class="nav-item">
-                  <a class="nav-link" href="<?= $GLOBALS['VISTA_URL']; ?>contacto/contacto.php">Contacto</a>
-               </li>
+                     foreach ($menus as $m) {
+                        if ($m->getIdPadre() !== null) {
+                           $menusHijos[$m->getIdPadre()][] = $m;
+                        }
+                     }
+                  }
+                  ?>
 
-               <!-- Solo ADMIN -->
-               <?php if ($usuario && in_array("admin", $rolesUsuario)): ?>
-               <li class="nav-item">
-                  <a class="nav-link text-warning fw-bold"
-                     href="<?= $GLOBALS['VISTA_URL']; ?>roles/panelRoles.php">
-                     <i class="fa fa-users-cog"></i> Administrar Roles
-                  </a>
-               </li>
-               <?php endif; ?>
+                  <?php if ($usuario && !empty($menus)): ?>
 
-               <!-- Si el usuario está logueado -->
-               <?php if ($usuario): ?>
-               
+                     <?php foreach ($menusPadre as $padre): ?>
+                        <?php $id = $padre->getIdMenu(); ?>
+
+                        <?php if (isset($menusHijos[$id])): ?>
+                           <!-- Dropdown -->
+                           <li class="nav-item dropdown">
+                              <a class="nav-link dropdown-toggle" href="#" role="button"
+                                 data-bs-toggle="dropdown">
+                                 <?= $padre->getMeNombre(); ?>
+                              </a>
+                              <ul class="dropdown-menu">
+                                 <?php foreach ($menusHijos[$id] as $hijo): ?>
+                                    <li>
+                                       <a class="dropdown-item" href="<?= $GLOBALS['VISTA_URL'] . $hijo->getMeDescripcion(); ?>">
+                                          <?= $hijo->getMeNombre(); ?>
+                                       </a>
+                                    </li>
+                                 <?php endforeach; ?>
+                              </ul>
+                           </li>
+
+                        <?php else: ?>
+                           <!-- Ítem simple -->
+                           <li class="nav-item">
+                              <a class="nav-link" href="<?= $GLOBALS['VISTA_URL'] . $padre->getMeDescripcion(); ?>">
+                                 <?= $padre->getMeNombre(); ?>
+                              </a>
+                           </li>
+                        <?php endif; ?>
+
+                     <?php endforeach; ?>
+
+                  <?php endif; ?>
+
+                  <!-- Ítems estándar -->
                   <li class="nav-item">
-                     <a class="nav-link text-primary fw-bold" href="<?= $GLOBALS['VISTA_URL']; ?>login/paginaSegura.php">
-                        <i class="fa fa-user"></i>
-                        <?= htmlspecialchars($usuario->getUsNombre()); ?>
-                     </a>
+                     <a class="nav-link" href="<?= $GLOBALS['VISTA_URL']; ?>producto/producto.php">Productos</a>
                   </li>
 
                   <li class="nav-item">
-                     <a class="nav-link text-danger fw-bold"
-                        href="<?= $GLOBALS['VISTA_URL']; ?>login/accion/cerrarSesion.php">
-                        <i class="fa fa-sign-out-alt"></i> Cerrar sesión
-                     </a>
+                     <a class="nav-link" href="<?= $GLOBALS['VISTA_URL']; ?>compra/carrito.php">Carrito</a>
                   </li>
 
-               <!-- Si NO está logueado -->
-               <?php else: ?>
-               
                   <li class="nav-item">
-                     <a class="nav-link" href="<?= $GLOBALS['VISTA_URL']; ?>login/login.php">
-                        <i class="fa fa-sign-in-alt"></i> Login
-                     </a>
+                     <a class="nav-link" href="<?= $GLOBALS['VISTA_URL']; ?>contacto/contacto.php">Contacto</a>
                   </li>
 
-               <?php endif; ?>
+                  <!-- ADMIN -->
+                  <?php if ($usuario && in_array("admin", $rolesUsuario)): ?>
+                     <li class="nav-item">
+                        <a class="nav-link text-warning fw-bold"
+                           href="<?= $GLOBALS['VISTA_URL']; ?>admin/roles/panelRoles.php">
+                           <i class="fa fa-users-cog"></i> Administrar Roles
+                        </a>
+                     </li>
+                  <?php endif; ?>
 
-            </ul>
+
+                  <!-- Usuario logueado -->
+                  <?php if ($usuario): ?>
+
+                     <li class="nav-item">
+                        <a class="nav-link text-primary fw-bold"
+                           href="<?= $GLOBALS['VISTA_URL']; ?>login/paginaSegura.php">
+                           <i class="fa fa-user"></i>
+                           <?= htmlspecialchars($usuario->getUsNombre()); ?>
+                        </a>
+                     </li>
+
+                     <li class="nav-item">
+                        <a class="nav-link text-danger fw-bold"
+                           href="<?= $GLOBALS['VISTA_URL']; ?>login/accion/cerrarSesion.php">
+                           <i class="fa fa-sign-out-alt"></i> Cerrar sesión
+                        </a>
+                     </li>
+
+                  <?php else: ?>
+
+                     <!-- Usuario NO logueado -->
+                     <li class="nav-item">
+                        <a class="nav-link" href="<?= $GLOBALS['VISTA_URL']; ?>login/login.php">
+                           <i class="fa fa-sign-in-alt"></i> Login
+                        </a>
+                     </li>
+
+                  <?php endif; ?>
+
+               </ul>
+            </div>
          </div>
-      </div>
-   </nav>
-</header>
+      </nav>
+   </header>
+
+   <!-- Espacio para que no quede el contenido debajo del header -->
+   <div style="padding-top: 90px;"></div>

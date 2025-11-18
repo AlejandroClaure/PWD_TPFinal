@@ -1,5 +1,7 @@
 <?php
-include_once dirname(__DIR__, 2) . '/configuracion.php';
+// CONFIGURACIÓN (subir 3 niveles)
+// /Vista/admin/roles/panelRoles.php → raíz del proyecto
+include_once dirname(__DIR__, 3) . '/configuracion.php';
 
 // Iniciar sesión si no existe
 if (session_status() === PHP_SESSION_NONE) {
@@ -9,27 +11,35 @@ if (session_status() === PHP_SESSION_NONE) {
 $session = new Session();
 $usuario = $session->getUsuario();
 
-// Proteger acceso solo para admin
+// Si no está logueado, fuera
+if (!$usuario) {
+    header("Location: ../../login/login.php");
+    exit;
+}
+
+// Verificar si es admin
 $abmUR = new AbmUsuarioRol();
 $rolesUsuario = $abmUR->rolesDeUsuario($usuario->getIdUsuario());
 
 if (!in_array("admin", $rolesUsuario)) {
-    header("Location: ../error/noAutorizado.php");
+    header("Location: ../../error/noAutorizado.php");
     exit;
 }
 
+// Listas necesarias
 $abmRol = new AbmRol();
 $listaRoles = $abmRol->listar();
 
 $abmUsuario = new AbmUsuario();
 $listaUsuarios = $abmUsuario->buscar([]);
+
 ?>
 
-<?php include_once dirname(__DIR__) . "/estructura/cabecera.php"; ?>
+<?php include_once dirname(__DIR__, 2) . "/estructura/cabecera.php"; ?>
+<!-- cabecera está en /Vista/estructura -->
 
 <div class="container mt-5 pt-5">
 
-    <!-- TÍTULO Y BOTÓN VOLVER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Administración de Roles</h2>
         <a href="<?= $GLOBALS['BASE_URL']; ?>" class="btn btn-secondary">
@@ -37,7 +47,7 @@ $listaUsuarios = $abmUsuario->buscar([]);
         </a>
     </div>
 
-    <!-- ================== CREAR ROL ================== -->
+    <!-- CREAR ROL -->
     <div class="card mb-4 shadow">
         <div class="card-header bg-primary text-white">Crear nuevo rol</div>
         <div class="card-body">
@@ -50,7 +60,7 @@ $listaUsuarios = $abmUsuario->buscar([]);
         </div>
     </div>
 
-    <!-- ================== LISTA ROLES ================== -->
+    <!-- LISTA ROLES -->
     <div class="card mb-4 shadow">
         <div class="card-header bg-dark text-white">Roles existentes</div>
         <div class="card-body">
@@ -88,7 +98,7 @@ $listaUsuarios = $abmUsuario->buscar([]);
         </div>
     </div>
 
-    <!-- ================== ASIGNAR ROLES A USUARIOS ================== -->
+    <!-- ASIGNAR ROLES -->
     <div class="card mb-5 shadow">
         <div class="card-header bg-secondary text-white">Asignar rol a usuario</div>
         <div class="card-body">
@@ -126,7 +136,7 @@ $listaUsuarios = $abmUsuario->buscar([]);
 
 </div>
 
-<!-- ========= Modal de edición ========= -->
+<!-- MODAL -->
 <div class="modal fade" id="modalEditarRol" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -164,4 +174,4 @@ function editarRol(id, desc) {
 }
 </script>
 
-<?php include_once dirname(__DIR__) . "/estructura/pie.php"; ?>
+<?php include_once dirname(__DIR__, 2) . "/estructura/pie.php"; ?>

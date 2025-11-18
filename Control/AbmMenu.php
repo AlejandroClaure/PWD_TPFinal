@@ -90,19 +90,44 @@ class AbmMenu {
     }
 
     /* Obtiene los menús accesibles por un usuario */
-    public function obtenerMenuPorUsuario($idUsuario) {
+ public function obtenerMenuPorRoles($roles) {
 
-        $sql = "idmenu IN (
-                    SELECT idmenu
-                    FROM menurol
-                    INNER JOIN usuario ON usuario.idrol = menurol.idrol
-                    WHERE usuario.idusuario = " . intval($idUsuario) . "
-                ) 
-                AND (medeshabilitado = '0000-00-00 00:00:00' 
-                     OR medeshabilitado IS NULL)";
+    // $roles puede venir como ["admin", "cliente"] o como array de objetos Rol
+    $idsRoles = [];
 
-        return Menu::listar($sql);
+    foreach ($roles as $r) {
+        if (is_object($r) && method_exists($r, "getIdRol")) {
+            $idsRoles[] = $r->getIdRol();
+        } else {
+            // Si es string, obtenemos ID de la BD
+            $objRol = new Rol();
+            $rolesEncontrados = $objRol->listar("rodescripcion = '" . $r . "'");
+            if (!empty($rolesEncontrados)) {
+                $idsRoles[] = $rolesEncontrados[0]->getIdRol();
+            }
+        }
     }
+
+    if (empty($idsRoles)) {
+        return [];
+    }
+
+    // Convertir a lista separada por comas
+    $ids = implode(",", $idsRoles);
+
+    $sql = "
+        idmenu IN (
+            SELECT idmenu 
+            FROM menurol 
+            WHERE idrol IN ($ids)
+        )
+        AND (medeshabilitado IS NULL OR medeshabilitado = '0000-00-00 00:00:00')
+    ";
+
+    return Menu::listar($sql);
+}
+
+
 
     /* Verifica existencia de clave primaria */
     private function seteadosCamposClaves($params) {
