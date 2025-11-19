@@ -1,5 +1,9 @@
 <?php
+// Vista/estructura/cabecera.php
+
 include_once dirname(__DIR__, 2) . '/configuracion.php';
+include_once dirname(__DIR__, 2) . '/Control/AbmMenu.php';
+include_once dirname(__DIR__, 2) . '/Control/AbmUsuarioRol.php';
 
 if (session_status() === PHP_SESSION_NONE) {
    session_start();
@@ -10,8 +14,30 @@ $usuario = $session->getUsuario();
 
 $rolesUsuario = [];
 if ($usuario) {
-   // Esto devuelve strings (“admin”, “cliente”, …)
-   $rolesUsuario = (new AbmUsuarioRol())->rolesDeUsuario($usuario->getIdUsuario());
+   $abmUR = new AbmUsuarioRol();
+   $rolesUsuario = $abmUR->rolesDeUsuario($usuario->getIdUsuario());
+}
+
+/* -----------------------------------------------------
+   🔹 NUEVO: obtener TODOS los menús visibles (medeshabilitado = 0)
+   ----------------------------------------------------- */
+$abmMenu = new AbmMenu();
+$menus = $abmMenu->buscar("medeshabilitado = 0");
+
+/* -----------------------------------------------------
+   🔹 Agrupar padres e hijos
+   ----------------------------------------------------- */
+$menusPadre = [];
+$menusHijos = [];
+
+foreach ($menus as $m) {
+   $padreObj = $m->getObjMenuPadre();
+
+   if ($padreObj === null) {
+      $menusPadre[] = $m;
+   } else {
+      $menusHijos[$padreObj->getIdMenu()][] = $m;
+   }
 }
 ?>
 <!DOCTYPE html>
@@ -37,76 +63,28 @@ if ($usuario) {
       <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm fixed-top">
          <div class="container">
 
+            <!-- Botón menú lateral -->
+            <button class="btn btn-outline-secondary me-3"
+               data-bs-toggle="offcanvas"
+               data-bs-target="#sidebarMenu">
+               <i class="fa fa-bars"></i>
+            </button>
+
             <!-- Logo -->
             <a class="navbar-brand logo" href="<?= $GLOBALS['BASE_URL']; ?>">
                <img src="<?= $GLOBALS['IMG_URL']; ?>logo.png"
-                  alt="Logo" width="50" height="50"
+                  width="50" height="50"
                   class="me-1 rounded-circle">
                Tienda Online
             </a>
 
-            <!-- Botón menú responsive -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-               data-bs-target="#navbarNav1">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav1">
                <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav1">
                <ul class="navbar-nav ms-auto">
-                  <?php
-                  if ($usuario) {
-                     $abmMenu = new AbmMenu();
-                     $menus = $abmMenu->obtenerMenuPorRoles($rolesUsuario);
 
-                     // Agrupar por padre
-                     $menusPadre = array_filter($menus, fn($m) => $m->getIdPadre() === null);
-                     $menusHijos = [];
-
-                     foreach ($menus as $m) {
-                        if ($m->getIdPadre() !== null) {
-                           $menusHijos[$m->getIdPadre()][] = $m;
-                        }
-                     }
-                  }
-                  ?>
-
-                  <?php if ($usuario && !empty($menus)): ?>
-
-                     <?php foreach ($menusPadre as $padre): ?>
-                        <?php $id = $padre->getIdMenu(); ?>
-
-                        <?php if (isset($menusHijos[$id])): ?>
-                           <!-- Dropdown -->
-                           <li class="nav-item dropdown">
-                              <a class="nav-link dropdown-toggle" href="#" role="button"
-                                 data-bs-toggle="dropdown">
-                                 <?= $padre->getMeNombre(); ?>
-                              </a>
-                              <ul class="dropdown-menu">
-                                 <?php foreach ($menusHijos[$id] as $hijo): ?>
-                                    <li>
-                                       <a class="dropdown-item" href="<?= $GLOBALS['VISTA_URL'] . $hijo->getMeDescripcion(); ?>">
-                                          <?= $hijo->getMeNombre(); ?>
-                                       </a>
-                                    </li>
-                                 <?php endforeach; ?>
-                              </ul>
-                           </li>
-
-                        <?php else: ?>
-                           <!-- Ítem simple -->
-                           <li class="nav-item">
-                              <a class="nav-link" href="<?= $GLOBALS['VISTA_URL'] . $padre->getMeDescripcion(); ?>">
-                                 <?= $padre->getMeNombre(); ?>
-                              </a>
-                           </li>
-                        <?php endif; ?>
-
-                     <?php endforeach; ?>
-
-                  <?php endif; ?>
-
-                  <!-- Ítems estándar -->
                   <li class="nav-item">
                      <a class="nav-link" href="<?= $GLOBALS['VISTA_URL']; ?>producto/producto.php">Productos</a>
                   </li>
@@ -123,16 +101,14 @@ if ($usuario) {
                   <?php if ($usuario && in_array("admin", $rolesUsuario)): ?>
                      <li class="nav-item">
                         <a class="nav-link text-warning fw-bold"
-                           href="<?= $GLOBALS['VISTA_URL']; ?>admin/roles/panelRoles.php">
-                           <i class="fa fa-users-cog"></i> Administrar Roles
+                           href="<?= $GLOBALS['VISTA_URL']; ?>admin/panelAdmin.php">
+                           <i class="fa fa-bars"></i> Administrar Paneles
                         </a>
                      </li>
                   <?php endif; ?>
 
-
-                  <!-- Usuario logueado -->
+                  <!-- Usuario -->
                   <?php if ($usuario): ?>
-
                      <li class="nav-item">
                         <a class="nav-link text-primary fw-bold"
                            href="<?= $GLOBALS['VISTA_URL']; ?>login/paginaSegura.php">
@@ -149,14 +125,11 @@ if ($usuario) {
                      </li>
 
                   <?php else: ?>
-
-                     <!-- Usuario NO logueado -->
                      <li class="nav-item">
                         <a class="nav-link" href="<?= $GLOBALS['VISTA_URL']; ?>login/login.php">
                            <i class="fa fa-sign-in-alt"></i> Login
                         </a>
                      </li>
-
                   <?php endif; ?>
 
                </ul>
@@ -165,5 +138,54 @@ if ($usuario) {
       </nav>
    </header>
 
-   <!-- Espacio para que no quede el contenido debajo del header -->
+
+<!-- MENÚ LATERAL -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu">
+    <div class="offcanvas-header">
+        <h5><i class="fa fa-bars me-1"></i> Menú</h5>
+        <button class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+
+    <div class="offcanvas-body">
+        <?php if (!empty($menusPadre)): ?>
+            <ul class="list-group">
+
+                <?php foreach ($menusPadre as $padre): ?>
+                    <li class="list-group-item">
+
+                        <!-- Nombre categoría padre -->
+                        <strong><?= htmlspecialchars($padre->getMeNombre()); ?></strong>
+
+                        <!-- "Ver todo" -->
+                        <div class="mb-1">
+                            <a href="<?= $GLOBALS['VISTA_URL']; ?>secciones/<?= $padre->getMeDescripcion(); ?>" class="text-decoration-none small">
+                                Ver todo <?= htmlspecialchars($padre->getMeNombre()); ?>
+                            </a>
+                        </div>
+
+                        <?php if (!empty($menusHijos[$padre->getIdMenu()])): ?>
+                            <ul class="list-group ms-3 mt-1">
+                                <?php foreach ($menusHijos[$padre->getIdMenu()] as $hijo): ?>
+                                    <li class="list-group-item py-1">
+                                        <a href="<?= $GLOBALS['VISTA_URL']; ?>secciones/<?= $hijo->getMeDescripcion(); ?>" class="text-decoration-none">
+                                            <?= htmlspecialchars($hijo->getMeNombre()); ?>
+                                        </a>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php endif; ?>
+
+                    </li>
+                <?php endforeach; ?>
+
+            </ul>
+        <?php else: ?>
+            <p class="text-muted">No hay secciones aún.</p>
+        <?php endif; ?>
+    </div>
+</div>
+
+
    <div style="padding-top: 90px;"></div>
+
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

@@ -106,47 +106,82 @@ class Menu extends BaseDatos {
         return $resp;
     }
 
-    public function insertar() {
-        $resp = false;
+   public function insertar() {
+    $resp = false;
 
-        $idpadre = $this->objmenupadre ? $this->objmenupadre->getIdMenu() : "NULL";
-        $deshab = $this->medeshabilitado ?? 0;
+    // Normalizar padre: puede venir objeto, número o null
+    $idpadre = "NULL";
 
-        $sql = "INSERT INTO menu (menombre, medescripcion, idpadre, medeshabilitado)
-                VALUES ('{$this->menombre}', '{$this->medescripcion}', $idpadre, $deshab)";
+    if (!empty($this->objmenupadre)) {
 
-        if ($this->Iniciar()) {
-            if ($this->Ejecutar($sql)) {
-                $resp = true;
-            } else {
-                $this->mensajeoperacion = "menu->insertar: " . $this->getError();
-            }
+        // Si NO es un objeto → convertirlo en objeto Menu
+        if (!is_object($this->objmenupadre)) {
+            $padreObj = new Menu();
+            $padreObj->setIdMenu(intval($this->objmenupadre));
+            $padreObj->cargar();
+            $this->objmenupadre = $padreObj;
         }
-        return $resp;
+
+        // Ahora sí, es un objeto
+        $idpadre = $this->objmenupadre->getIdMenu();
     }
 
-    public function modificar() {
-        $resp = false;
+    $deshab = $this->medeshabilitado ?? 0;
 
-        $idpadre = $this->objmenupadre ? $this->objmenupadre->getIdMenu() : "NULL";
-        $deshab = $this->medeshabilitado;
+    $sql = "INSERT INTO menu (menombre, medescripcion, idpadre, medeshabilitado)
+            VALUES ('{$this->menombre}', '{$this->medescripcion}', $idpadre, $deshab)";
 
-        $sql = "UPDATE menu SET 
-                    menombre = '{$this->menombre}',
-                    medescripcion = '{$this->medescripcion}',
-                    idpadre = $idpadre,
-                    medeshabilitado = $deshab
-                WHERE idmenu = {$this->idmenu}";
-
-        if ($this->Iniciar()) {
-            if ($this->Ejecutar($sql)) {
-                $resp = true;
-            } else {
-                $this->mensajeoperacion = "menu->modificar: " . $this->getError();
-            }
+    if ($this->Iniciar()) {
+        $id = $this->Ejecutar($sql);
+        if ($id) {
+            $this->idmenu = $id;
+            $resp = true;
+        } else {
+            $this->mensajeoperacion = "menu->insertar: " . $this->getError();
         }
-        return $resp;
     }
+
+    return $resp;
+}
+
+
+   public function modificar() {
+    $resp = false;
+
+    $idpadre = "NULL";
+
+    if (!empty($this->objmenupadre)) {
+
+        if (!is_object($this->objmenupadre)) {
+            $padreObj = new Menu();
+            $padreObj->setIdMenu(intval($this->objmenupadre));
+            $padreObj->cargar();
+            $this->objmenupadre = $padreObj;
+        }
+
+        $idpadre = $this->objmenupadre->getIdMenu();
+    }
+
+    $deshab = $this->medeshabilitado ?? 0;
+
+    $sql = "UPDATE menu SET
+                menombre = '{$this->menombre}',
+                medescripcion = '{$this->medescripcion}',
+                idpadre = $idpadre,
+                medeshabilitado = $deshab
+            WHERE idmenu = {$this->idmenu}";
+
+    if ($this->Iniciar()) {
+        if ($this->Ejecutar($sql)) {
+            $resp = true;
+        } else {
+            $this->mensajeoperacion = "menu->modificar: " . $this->getError();
+        }
+    }
+
+    return $resp;
+}
+
 
   
     public function eliminar() {

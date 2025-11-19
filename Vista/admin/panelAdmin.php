@@ -63,7 +63,7 @@ include_once "../estructura/cabecera.php";
                     <p class="card-text">
                         Crear, editar y organizar el menú visible según los roles asignados.
                     </p>
-                    <a href="gestionMenus.php" class="btn btn-info w-100">Administrar Menús</a>
+                    <a href="menus/gestionMenus.php" class="btn btn-info w-100">Administrar Menús</a>
                 </div>
             </div>
         </div>
