@@ -6,7 +6,8 @@
 
 /* Ganti warna background navbar */
 .navbar {
-  background-color: #4e73df !important; /* biru lembut */
+  background: linear-gradient(90deg, #00255d8e, #4fd7f9);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 /* Ganti warna teks link navbar */

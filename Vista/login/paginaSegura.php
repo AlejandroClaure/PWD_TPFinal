@@ -30,9 +30,11 @@ include_once "../estructura/cabecera.php";
 
     <hr>
 
-    <!-- ACCESOS RÁPIDOS -->
+    <!-- ACCESOS RÁPIDOS COMO ANTES -->
     <h4 class="mt-4">Accesos rápidos</h4>
+
     <div class="row mt-3">
+
         <!-- ADMIN -->
         <?php if (in_array("admin", $roles)): ?>
             <div class="col-md-4 mb-3">
@@ -71,10 +73,12 @@ include_once "../estructura/cabecera.php";
                 </div>
             </div>
         <?php endif; ?>
+
     </div>
 
     <!-- MENÚS DINÁMICOS -->
     <h4 class="mt-5">Menús del sistema según tu rol</h4>
+
     <div class="row mt-3">
         <?php if (empty($menus)): ?>
             <p class="text-muted">No tenés menús asignados.</p>
@@ -84,11 +88,12 @@ include_once "../estructura/cabecera.php";
             <div class="col-md-4 mb-3">
                 <div class="card shadow-sm">
                     <div class="card-body">
+
                         <h5 class="card-title"><?= $menu->getMeNombre(); ?></h5>
                         <p class="card-text"><?= $menu->getMeDescripcion(); ?></p>
 
-                        <?php if (!empty($menu->getMeDescripcion())): ?>
-                            <a href="<?= $GLOBALS['VISTA_URL'] . 'secciones/' . $menu->getMeDescripcion(); ?>" class="btn btn-outline-primary w-100">
+                        <?php if (!empty($menu->getMeLink())): ?>
+                            <a href="<?= $menu->getMeLink(); ?>" class="btn btn-outline-primary w-100">
                                 Ir al menú
                             </a>
                         <?php else: ?>
@@ -96,6 +101,7 @@ include_once "../estructura/cabecera.php";
                                 Sin enlace configurado
                             </button>
                         <?php endif; ?>
+
                     </div>
                 </div>
             </div>

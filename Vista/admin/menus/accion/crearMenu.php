@@ -1,7 +1,4 @@
 <?php
-// ============================
-//      CONFIGURACIÓN
-// ============================
 include_once dirname(__DIR__, 4) . '/configuracion.php';
 include_once dirname(__DIR__, 4) . '/Control/AbmMenu.php';
 
@@ -19,87 +16,78 @@ if ($menombre === "") {
 // Normalizar nombre
 $menombre = ucfirst($menombre);
 
-// Crear slug seguro
+// Slug seguro
 $slug = strtolower(trim($menombre));
 $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
 $slug = trim($slug, "-");
 
-// Nombre archivo final
+// Generar ruta PHP
 $ruta = $slug . ".php";
-
-// Si es submenú, meter dentro del padre
 if ($tipo === "sub" && $idPadre) {
     $padre = $abmMenu->buscar(['idmenu' => $idPadre])[0];
     $padreSlug = strtolower(str_replace(".php", "", $padre->getMeDescripcion()));
     $ruta = $padreSlug . "/" . $slug . ".php";
 }
 
-// Ruta física final
+// Crear archivo de sección
 $carpetaSecciones = dirname(__DIR__, 4) . "/Vista/secciones/";
 $fullPath = $carpetaSecciones . $ruta;
-
-// Crear carpeta si no existe
 $dir = dirname($fullPath);
 if (!is_dir($dir)) mkdir($dir, 0777, true);
 
-// =====================================
-//   CALCULAR CUÁNTOS ../ NECESITA
-// =====================================
-$nivelProfundidad = substr_count($ruta, "/");
-$saltoRuta = str_repeat("../", $nivelProfundidad);
-
-// ===============================
-//  ARCHIVO PHP GENERADO (nowdoc)
-// ===============================
-$contenido = <<<'PHP'
+// Contenido del archivo generado
+$contenido = <<<HTML
 <?php
-include_once __DIR__ . '/__SALTO__../estructura/cabecera.php';
-include_once __DIR__ . '/__SALTO__../../Control/AbmProducto.php';
-include_once __DIR__ . '/__SALTO__../../Control/AbmMenu.php';
+include_once dirname(__DIR__, 2) . '/estructura/cabecera.php';
+include_once dirname(__DIR__, 3) . '/Control/AbmProducto.php';
 
-$abmProducto = new AbmProducto();
-$abmMenu = new AbmMenu();
+\$abmProducto = new AbmProducto();
+\$productos = [];
 
-// Obtener productos
-$todos = $abmProducto->listar();
-$productos = [];
+// Obtener todos los productos
+\$allProductos = \$abmProducto->listar();
 
-// __RUTA__ es reemplazado dinámicamente al generar el archivo (ej: "celulares/iphone.php" o "celulares.php")
-$generadaRuta = '__RUTA__';
+// Filtrado por primera palabra
+foreach (\$allProductos as \$prod) {
+    \$firstWord = explode(' ', trim(\$prod->getProNombre()))[0];
+    if (\$firstWord === '{$menombre}') {
+        \$productos[] = \$prod;
+    }
+}
 
-// Convertir ruta de archivo a prefijo de categoría: quitar extensión y transformar "/" por "_", y añadir "_" final
-$prefijoCategoria = strtolower(str_replace('.php', '', $generadaRuta));
-$prefijoCategoria = str_replace('/', '_', $prefijoCategoria) . '_';
-
-// Filtrar productos que empiecen con el prefijo completo (case-insensitive)
-foreach ($todos as $p) {
-    $nombreProducto = strtolower($p->getProNombre());
-    if (str_starts_with($nombreProducto, $prefijoCategoria)) {
-        $productos[] = $p;
+// Para categorías principales, agregar también productos de subcategorías
+if ('$tipo' === 'raiz') {
+    // Buscar subcategorías del menú padre
+    include_once dirname(__DIR__, 3) . '/Control/AbmMenu.php';
+    \$abmMenu = new AbmMenu();
+    \$hijos = \$abmMenu->buscar(['idpadre' => $idNuevoMenu ?? null]);
+    foreach (\$hijos as \$h) {
+        foreach (\$allProductos as \$prod) {
+            \$firstWord = explode(' ', trim(\$prod->getProNombre()))[0];
+            if (\$firstWord === \$h->getMeNombre()) {
+                \$productos[] = \$prod;
+            }
+        }
     }
 }
 ?>
+
 <div class="container mt-4 pt-4">
-    <h1 class="mb-4"><?php echo htmlspecialchars('REPLACEMENOMBRE'); ?></h1>
+    <h1 class="mb-4">{$menombre}</h1>
     <div class="row g-3">
-        <?php if (empty($productos)): ?>
+        <?php if (empty(\$productos)): ?>
             <p class="text-muted">No hay productos cargados en esta sección.</p>
         <?php else: ?>
-            <?php foreach ($productos as $prod): ?>
-                <?php
-                // Mostrar solo lo que está después del último "_" (nombre visible)
-                $partes = explode('_', $prod->getProNombre());
-                $nombreVisible = end($partes);
-                ?>
+            <?php foreach (\$productos as \$prod): ?>
                 <div class="col-md-4">
                     <div class="card shadow-sm">
-                        <img src="<?= $GLOBALS['IMG_URL']; ?>productos/<?= $prod->getProNombre(); ?>.jpg"
+                        <img src="<?= \$GLOBALS['IMG_URL']; ?>productos/<?= \$prod->getProNombre(); ?>.jpg"
                              class="card-img-top"
-                             alt="<?= htmlspecialchars($nombreVisible, ENT_QUOTES); ?>">
+                             alt="<?= \$prod->getProNombre(); ?>">
                         <div class="card-body">
-                            <h5><?= htmlspecialchars($nombreVisible); ?></h5>
-                            <p class="text-success fs-4 fw-bold">$<?= htmlspecialchars($prod->getProDetalle()); ?></p>
-                            <a href="<?= $GLOBALS['VISTA_URL']; ?>compra/accion/agregarCarrito.php?id=<?= $prod->getIdProducto(); ?>"
+                            <h5><?= \$prod->getProNombre(); ?></h5>
+                            <p class="text-success fs-4 fw-bold">$<?= \$prod->getProDetalle(); ?></p>
+                            <a href="<?= \$GLOBALS['VISTA_URL']; ?>compra/accion/agregarCarrito.php?id=<?= \$prod->getIdProducto(); ?>"
                                class="btn btn-warning w-100">
                                <i class="fa fa-shopping-cart"></i> Agregar al carrito
                             </a>
@@ -111,21 +99,13 @@ foreach ($todos as $p) {
     </div>
 </div>
 
-<?php include_once __DIR__ . '/__SALTO__../estructura/pie.php'; ?>
-PHP;
+<?php include_once dirname(__DIR__, 2) . '/estructura/pie.php'; ?>
+HTML;
 
-// Reemplazos seguros dentro del contenido generado
-$contenido = str_replace('__SALTO__', $saltoRuta, $contenido);
-$contenido = str_replace('__RUTA__', $ruta, $contenido);
-// Reemplazamos también el nombre mostrado (evita inyección de variables en el nowdoc)
-$contenido = str_replace('REPLACEMENOMBRE', addslashes($menombre), $contenido);
-
-// Guardar archivo físico
+// Guardar archivo
 file_put_contents($fullPath, $contenido);
 
-// ============================
-//     GUARDAR EN DB
-// ============================
+// Guardar menú en BD
 $datos = [
     "idmenu" => null,
     "menombre" => $menombre,
@@ -136,7 +116,7 @@ $datos = [
 
 $idNuevoMenu = $abmMenu->alta($datos);
 
-// Permisos para todos
+// Asignar a todos los roles
 include_once dirname(__DIR__, 4) . '/Control/AbmMenuRol.php';
 $abmMenuRol = new AbmMenuRol();
 $roles = [1, 2, 3, 4, 5];
@@ -144,6 +124,7 @@ foreach ($roles as $r) {
     $abmMenuRol->alta(["idmenu" => $idNuevoMenu, "idrol" => $r]);
 }
 
+// Redirigir
 header("Location: ../gestionMenus.php?ok=1");
 exit;
 ?>
