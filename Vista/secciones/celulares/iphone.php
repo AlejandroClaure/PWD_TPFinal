@@ -3,11 +3,9 @@ include_once __DIR__ . '/../../estructura/cabecera.php';
 include_once __DIR__ . '/../../../Control/AbmProducto.php';
 include_once __DIR__ . '/../../../Control/AbmMenu.php';
 
-// ================================
-//  Variables necesarias para el archivo generado
-// ================================
+// Variables dinámicas
 $tipo = 'sub';
-$idPadre = 66;
+$idPadre = 68;
 
 $abmProducto = new AbmProducto();
 $abmMenu = new AbmMenu();
@@ -16,14 +14,14 @@ $abmMenu = new AbmMenu();
 $todos = $abmProducto->listar();
 $productos = [];
 
-// celulares/iphone.php es reemplazado dinámicamente al generar el archivo (ej: "celulares/iphone.php" o "celulares.php")
+// celulares/iphone.php es reemplazado dinámicamente
 $generadaRuta = 'celulares/iphone.php';
 
-// Convertir ruta de archivo a prefijo de categoría: quitar extensión y transformar "/" por "_", y añadir "_" final
+// Prefijo de categoría
 $prefijoCategoria = strtolower(str_replace('.php', '', $generadaRuta));
 $prefijoCategoria = str_replace('/', '_', $prefijoCategoria) . '_';
 
-// Filtrar productos que empiecen con el prefijo completo (case-insensitive)
+// Filtrar productos de la categoría principal
 foreach ($todos as $p) {
     $nombreProducto = strtolower($p->getProNombre());
     if (str_starts_with($nombreProducto, $prefijoCategoria)) {
@@ -31,9 +29,7 @@ foreach ($todos as $p) {
     }
 }
 
-// ================================
-//  Incluir productos de subcategorías si existen
-// ================================
+// Incluir productos de subcategorías si existen
 $idPadreActual = $tipo === 'raiz' ? null : $idPadre;
 $hijos = $abmMenu->buscar(['idpadre' => $idPadreActual]);
 foreach ($hijos as $hijo) {
@@ -44,7 +40,12 @@ foreach ($hijos as $hijo) {
         }
     }
 }
+
+// Rutas de imágenes
+$imgBaseUrl = $GLOBALS['IMG_URL'] ?? '/PWD_TPFinal/Vista/imagenes/';
+$imgDir     = dirname(__DIR__, 2) . '/imagenes/';
 ?>
+
 <div class="container mt-4 pt-4">
     <h1 class="mb-4"><?php echo htmlspecialchars('Iphone'); ?></h1>
     <div class="row g-3">
@@ -55,18 +56,40 @@ foreach ($hijos as $hijo) {
                 <?php
                 $partes = explode('_', $prod->getProNombre());
                 $nombreVisible = end($partes);
+
+                // Buscar imagen
+                $baseName = str_replace(' ', '_', $prod->getProNombre());
+                if (file_exists($imgDir . $baseName . '.jpg')) {
+                    $imagenURL = $imgBaseUrl . $baseName . '.jpg';
+                } elseif (file_exists($imgDir . $baseName . '.jpeg')) {
+                    $imagenURL = $imgBaseUrl . $baseName . '.jpeg';
+                } else {
+                    $imagenURL = $imgBaseUrl . 'no-image.jpeg';
+                }
+
+                // Precio y stock
+                $precio = str_replace(['$', ','], '', $prod->getProDetalle());
+                $precio = (float)$precio;
+                $stock  = (int)$prod->getProCantStock();
                 ?>
-                <div class="col-md-4">
-                    <div class="card shadow-sm">
-                        <img src="<?= $GLOBALS['IMG_URL']; ?>productos/<?= $prod->getProNombre(); ?>.jpg"
+                <div class="col-md-4 col-lg-3">
+                    <div class="card shadow-sm h-100">
+                        <img src="<?= htmlspecialchars($imagenURL, ENT_QUOTES); ?>"
                              class="card-img-top"
-                             alt="<?= htmlspecialchars($nombreVisible, ENT_QUOTES); ?>">
+                             alt="<?= htmlspecialchars($nombreVisible, ENT_QUOTES); ?>"
+                             onerror="this.src='<?= $imgBaseUrl; ?>no-image.jpeg';">
                         <div class="card-body">
-                            <h5><?= htmlspecialchars($nombreVisible); ?></h5>
-                            <p class="text-success fs-4 fw-bold">$<?= htmlspecialchars($prod->getProDetalle()); ?></p>
-                            <a href="<?= $GLOBALS['VISTA_URL']; ?>compra/accion/agregarCarrito.php?id=<?= $prod->getIdProducto(); ?>"
-                               class="btn btn-warning w-100">
-                               <i class="fa fa-shopping-cart"></i> Agregar al carrito
+                            <h5 class="card-title"><?= htmlspecialchars($nombreVisible); ?></h5>
+                            <p class="text-success fw-bold fs-5">
+                                $<?= number_format($precio, 2, ',', '.'); ?>
+                            </p>
+                            <p class="text-muted">
+                                Stock: <?= $stock; ?>
+                            </p>
+                            <a href="<?= $GLOBALS['VISTA_URL'] ?? '/PWD_TPFinal/Vista/'; ?>compra/accion/agregarCarrito.php?id=<?= $prod->getIdProducto(); ?>"
+                               class="btn btn-warning w-100 <?= $stock <= 0 ? 'disabled' : ''; ?>">
+                                <i class="fa fa-shopping-cart"></i> 
+                                <?= $stock > 0 ? 'Agregar al carrito' : 'Sin stock'; ?>
                             </a>
                         </div>
                     </div>

@@ -10,14 +10,14 @@ if (!$session->activa()) {
     exit;
 }
 
-// Incluir la clase de productos usando la ruta absoluta
+// Incluir AbmProducto
 include_once $GLOBALS['CONTROL_PATH'] . 'AbmProducto.php';
-
 $abmProducto = new AbmProducto();
 $productos = $abmProducto->listar();
 
 $imgBaseUrl = $GLOBALS['IMG_URL'] ?? '/PWD_TPFinal/Vista/imagenes/';
-$imgDir     = dirname(__DIR__) . '/imagenes/'; // Ruta física al directorio de imágenes
+$imgDir     = dirname(__DIR__) . '/imagenes/'; 
+
 ?>
 
 <div class="row g-4">
@@ -26,14 +26,12 @@ $imgDir     = dirname(__DIR__) . '/imagenes/'; // Ruta física al directorio de 
 <?php else: ?>
     <?php foreach ($productos as $prod): ?>
         <?php
-        // Mostrar solo nombre después del último "_"
+        // Nombre visible después del último "_"
         $partes = explode('_', $prod->getProNombre());
         $nombreVisible = end($partes);
 
-        // Construir nombre base de la imagen
+        // Imagen
         $baseName = str_replace(' ', '_', $prod->getProNombre());
-
-        // Buscar archivo con extensión .jpg o .jpeg
         if (file_exists($imgDir . $baseName . '.jpg')) {
             $imagenURL = $imgBaseUrl . $baseName . '.jpg';
         } elseif (file_exists($imgDir . $baseName . '.jpeg')) {
@@ -42,28 +40,32 @@ $imgDir     = dirname(__DIR__) . '/imagenes/'; // Ruta física al directorio de 
             $imagenURL = $imgBaseUrl . 'no-image.jpeg';
         }
 
-        // Debug: qué imagen intenta cargar
-        echo "<!-- Imagen buscada para {$prod->getProNombre()}: $imagenURL -->";
-        ?>
+        // Precio como float
+        $precio = $prod->getProDetalle();
+        $precio = str_replace(['$', ','], '', $precio); // quitar $ y comas
+        $precio = (float)$precio;
 
+        // Stock
+        $stock = (int)$prod->getProCantStock();
+        ?>
         <div class="col-md-4 col-lg-3">
             <div class="card shadow-sm h-100">
-                <img
-                    src="<?= htmlspecialchars($imagenURL, ENT_QUOTES); ?>"
-                    class="card-img-top"
-                    alt="<?= htmlspecialchars($nombreVisible, ENT_QUOTES); ?>"
-                    onerror="this.src='<?= $imgBaseUrl; ?>no-image.jpeg';"
-                >
+                <img src="<?= htmlspecialchars($imagenURL, ENT_QUOTES); ?>"
+                     class="card-img-top"
+                     alt="<?= htmlspecialchars($nombreVisible, ENT_QUOTES); ?>"
+                     onerror="this.src='<?= $imgBaseUrl; ?>no-image.jpeg';">
                 <div class="card-body">
                     <h5 class="card-title"><?= htmlspecialchars($nombreVisible); ?></h5>
                     <p class="text-success fw-bold fs-5">
-                        $<?= htmlspecialchars($prod->getProDetalle()); ?>
+                        $<?= number_format($precio, 2, ',', '.'); ?>
                     </p>
-                    <a
-                        href="<?= $GLOBALS['VISTA_URL'] ?? '/PWD_TPFinal/Vista/'; ?>compra/accion/agregarCarrito.php?id=<?= $prod->getIdProducto(); ?>"
-                        class="btn btn-warning w-100"
-                    >
-                        <i class="fa fa-shopping-cart"></i> Agregar al carrito
+                    <p class="text-muted">
+                        Stock: <?= $stock; ?>
+                    </p>
+                    <a href="<?= $GLOBALS['VISTA_URL'] ?? '/PWD_TPFinal/Vista/'; ?>compra/accion/agregarCarrito.php?id=<?= $prod->getIdProducto(); ?>"
+                       class="btn btn-warning w-100 <?= $stock <= 0 ? 'disabled' : ''; ?>">
+                        <i class="fa fa-shopping-cart"></i> 
+                        <?= $stock > 0 ? 'Agregar al carrito' : 'Sin stock'; ?>
                     </a>
                 </div>
             </div>
