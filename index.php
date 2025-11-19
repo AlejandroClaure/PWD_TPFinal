@@ -37,7 +37,6 @@ include_once $GLOBALS['VISTA_PATH'].'estructura/cabecera.php';
 
 </div>
 
-<?php include_once 'Vista/producto/albumProductos.php'; ?>
 
 </main>
 
