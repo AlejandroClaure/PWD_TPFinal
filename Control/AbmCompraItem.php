@@ -1,86 +1,48 @@
+// control/AbmCompraItem.php
 <?php
-
 class AbmCompraItem {
-
     public function alta($datos) {
-        $resp = false;
-
         $obj = new CompraItem();
-
-        $objProducto = new Producto();
-        $objProducto->setIdProducto($datos["idproducto"]);
+        $objProd = new Producto();
+        $objProd->setIdProducto($datos['idproducto']);
+        $objProd->cargar();
 
         $objCompra = new Compra();
-        $objCompra->setIdCompra($datos["idcompra"]);
+        $objCompra->setIdCompra($datos['idcompra']);
+        $objCompra->cargar();
 
-        $obj->setear(
-            null,
-            $objProducto,
-            $objCompra,
-            $datos["cicantidad"]
-        );
-
-        if ($obj->insertar()) {
-            $resp = true;
-        }
-
-        return $resp;
+        $obj->setear(0, $objProd, $objCompra, $datos['cicantidad']);
+        return $obj->insertar();
     }
 
     public function baja($datos) {
-        $resp = false;
-
-        if (isset($datos["idcompraitem"])) {
-            $obj = new CompraItem();
-            $obj->setIdCompraItem($datos["idcompraitem"]);
-
-            if ($obj->eliminar()) $resp = true;
-        }
-
-        return $resp;
+        $obj = new CompraItem();
+        $obj->setIdCompraItem($datos['idcompraitem']);
+        return $obj->eliminar();
     }
 
     public function modificacion($datos) {
-        $resp = false;
+        $obj = new CompraItem();
+        $obj->setIdCompraItem($datos['idcompraitem']);
+        $obj->cargar();
 
-        if (isset($datos["idcompraitem"])) {
-            $obj = new CompraItem();
+        $objProd = new Producto();
+        $objProd->setIdProducto($datos['idproducto']);
+        $objProd->cargar();
 
-            $objProducto = new Producto();
-            $objProducto->setIdProducto($datos["idproducto"]);
+        $objCompra = new Compra();
+        $objCompra->setIdCompra($datos['idcompra']);
+        $objCompra->cargar();
 
-            $objCompra = new Compra();
-            $objCompra->setIdCompra($datos["idcompra"]);
-
-            $obj->setear(
-                $datos["idcompraitem"],
-                $objProducto,
-                $objCompra,
-                $datos["cicantidad"]
-            );
-
-            if ($obj->modificar()) $resp = true;
-        }
-
-        return $resp;
+        $obj->setear($datos['idcompraitem'], $objProd, $objCompra, $datos['cicantidad']);
+        return $obj->modificar();
     }
 
-    public function buscar($param = null) {
-        $where = " true ";
-
-        if ($param != null) {
-            if (isset($param["idcompraitem"]))
-                $where .= " AND idcompraitem = " . $param["idcompraitem"];
-
-            if (isset($param["idcompra"]))
-                $where .= " AND idcompra = " . $param["idcompra"];
-
-            if (isset($param["idproducto"]))
-                $where .= " AND idproducto = " . $param["idproducto"];
-        }
-
-        $obj = new CompraItem();
-        return $obj->listar($where);
+    public function buscar($param = array()) {
+        $where = "true";
+        if (isset($param['idcompraitem'])) $where .= " AND idcompraitem = " . $param['idcompraitem'];
+        if (isset($param['idcompra'])) $where .= " AND idcompra = " . $param['idcompra'];
+        return (new CompraItem())->listar($where);
     }
 }
 ?>

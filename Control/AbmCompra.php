@@ -2,20 +2,14 @@
 
 class AbmCompra {
 
-    /**
-     * Crea una compra nueva
-     */
     public function alta($datos) {
         $resp = false;
 
         $obj = new Compra();
-        $objUsuario = new Usuario();
-        $objUsuario->setIdUsuario($datos["idusuario"]);
-
         $obj->setear(
-            null,
-            date("Y-m-d H:i:s"),
-            $objUsuario
+            0,                              // ID auto_increment
+            $datos["cofecha"],
+            $datos["idusuario"]
         );
 
         if ($obj->insertar()) {
@@ -25,9 +19,7 @@ class AbmCompra {
         return $resp;
     }
 
-    /**
-     * Elimina una compra
-     */
+
     public function baja($datos) {
         $resp = false;
 
@@ -43,22 +35,16 @@ class AbmCompra {
         return $resp;
     }
 
-    /**
-     * Modifica una compra
-     */
+
     public function modificacion($datos) {
         $resp = false;
 
         if (isset($datos["idcompra"])) {
             $obj = new Compra();
-
-            $objUsuario = new Usuario();
-            $objUsuario->setIdUsuario($datos["idusuario"]);
-
             $obj->setear(
                 $datos["idcompra"],
                 $datos["cofecha"],
-                $objUsuario
+                $datos["idusuario"]
             );
 
             if ($obj->modificar()) {
@@ -69,9 +55,7 @@ class AbmCompra {
         return $resp;
     }
 
-    /**
-     * Busca compras según criterio
-     */
+
     public function buscar($param = null) {
         $where = " true ";
 

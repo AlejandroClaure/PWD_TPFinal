@@ -132,4 +132,17 @@ class BaseDatos extends PDO {
         }
         return false;
     }
+    public function ultimoId() {
+    $id = null;
+
+    $sql = "SELECT LAST_INSERT_ID() as id";
+    if ($this->Ejecutar($sql) > 0) {
+        if ($row = $this->Registro()) {
+            $id = $row["id"];
+        }
+    }
+
+    return $id;
+}
+
 }
