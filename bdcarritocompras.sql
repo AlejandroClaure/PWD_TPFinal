@@ -17,9 +17,15 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
---
--- Base de datos: `bdcarritocompras`
---
+
+/*Base de datos: `bdcarritocompras`*/
+
+-- 1. Create the database if it doesn't exist
+CREATE DATABASE IF NOT EXISTS `bdcarritocompras` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- 2. Select the database for execution
+USE `bdcarritocompras`;
+-- --------------------------------------------------------
 
 -- --------------------------------------------------------
 
@@ -171,6 +177,7 @@ CREATE TABLE `usuario` (
 --
 
 INSERT INTO `usuario` (`idusuario`, `usnombre`, `uspass`, `usmail`, `usdeshabilitado`) VALUES
+(1, 'admin', '0192023a7bbd73250516f069df18b500', 'adm@gmail.com', NULL),
 (4, 'ale.c', '$2y$10$s2P69PrU9MRDkWN4g7PdiuhUHvb5rt6/Mht31A/UYbEhaR56IoAMi', 'alejandro.claure@est.fi.uncoma.edu.ar', NULL),
 (5, 'ale.c1', '$2y$10$xSl.XVXUNSz3AbGUkFjIAOBHRpD0yDNQmv.MmZLP13ymaH/r5agum', 'alejoclaure@gmail.com', NULL);
 
@@ -190,6 +197,7 @@ CREATE TABLE `usuariorol` (
 --
 
 INSERT INTO `usuariorol` (`idusuario`, `idrol`) VALUES
+(1, 1),
 (4, 1);
 
 --

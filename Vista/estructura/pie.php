@@ -7,90 +7,52 @@
                <p class="text-muted">Trabajo Final Integrador</p>
             </div>
          </div>
+      
+      <div class="row g-2 justify-content-center">
 
-         <div class="row g-4">
+         <!-- Integrante 1 -->
+         <div class="col-lg-3 col-md-6">
+            <div class="team-member text-center p-4">
+               <img src="<?= $GLOBALS['IMG_URL'] ?>perfilEstudiante1.jpg"
+                     alt="Alejandro Claure"
+                     class="mb-4 shadow rounded-circle"
+                     width="120" height="120">
 
-            <!-- Integrante 1 -->
-            <div class="col-lg-3 col-md-6">
-               <div class="team-member text-center p-4">
-                  <img src="<?= $GLOBALS['IMG_URL'] ?>alejandro.jpg"
-                       alt="Alejandro Claure"
-                       class="mb-4 shadow rounded-circle"
-                       width="120" height="120">
+               <h5 class="mb-1">Alejandro Claure</h5>
+               <p class="text-muted mb-3">Estudiante</p>
 
-                  <h5 class="mb-1">Alejandro Claure</h5>
-                  <p class="text-muted mb-3">Estudiante</p>
-
-                  <div class="social-links">
-                     <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                     <a href="#"><i class="fab fa-twitter"></i></a>
-                     <a href="#"><i class="fab fa-facebook-f"></i></a>
-                  </div>
+               <div class="social-links">
+                  <a href="https://www.linkedin.com/in/alejandro-claure/"><i class="fab fa-linkedin-in"></i></a>
+                  <a href="https://github.com/AlejandroClaure"><i class="fab fa-github"></i></a>
                </div>
             </div>
-
-            <!-- Integrante 2 -->
-            <div class="col-lg-3 col-md-6">
-               <div class="team-member text-center p-4">
-                  <img src="<?= $GLOBALS['IMG_URL'] ?>lucia.jpg"
-                       alt="Lucía Hernández"
-                       class="mb-4 shadow rounded-circle"
-                       width="120" height="120">
-
-                  <h5 class="mb-1">Lucía Hernández</h5>
-                  <p class="text-muted mb-3">Estudiante</p>
-
-                  <div class="social-links">
-                     <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                     <a href="#"><i class="fab fa-github"></i></a>
-                     <a href="#"><i class="fab fa-twitter"></i></a>
-                  </div>
-               </div>
-            </div>
-
-            <!-- Integrante 3 -->
-            <div class="col-lg-3 col-md-6">
-               <div class="team-member text-center p-4">
-                  <img src="<?= $GLOBALS['IMG_URL'] ?>carolina.jpg"
-                       alt="Carolina Otermin"
-                       class="mb-4 shadow rounded-circle"
-                       width="120" height="120">
-
-                  <h5 class="mb-1">Carolina Otermin</h5>
-                  <p class="text-muted mb-3">Estudiante</p>
-
-                  <div class="social-links">
-                     <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                     <a href="#"><i class="fab fa-dribbble"></i></a>
-                     <a href="#"><i class="fab fa-instagram"></i></a>
-                  </div>
-               </div>
-            </div>
-
-            <!-- Integrante 4 -->
-            <div class="col-lg-3 col-md-6">
-               <div class="team-member text-center p-4">
-                  <img src="<?= $GLOBALS['IMG_URL'] ?>cyntia.jpg"
-                       alt="Nasabun Cyntia"
-                       class="mb-4 shadow rounded-circle"
-                       width="120" height="120">
-
-                  <h5 class="mb-1">Nasabun Cyntia</h5>
-                  <p class="text-muted mb-3">Estudiante</p>
-
-                  <div class="social-links">
-                     <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                     <a href="#"><i class="fab fa-twitter"></i></a>
-                     <a href="#"><i class="fab fa-instagram"></i></a>
-                  </div>
-               </div>
-            </div>
-
          </div>
+
+         <!-- Integrante 2 -->
+         <div class="col-lg-3 col-md-6">
+            <div class="team-member text-center p-4">
+               <img src="<?= $GLOBALS['IMG_URL'] ?>perfilEstudiante2.jpg"
+                     alt="Nasabun Cyntia"
+                     class="mb-4 shadow rounded-circle"
+                     width="120" height="120">
+
+               <h5 class="mb-1">Cyntia Nasabun</h5>
+               <p class="text-muted mb-3">Estudiante</p>
+
+               <div class="social-links">
+                  <a href="https://www.linkedin.com/in/cyntia-nasabun-b7499288/"><i class="fab fa-linkedin-in"></i></a>
+                  <a href="https://github.com/Nasabunc09"><i class="fab fa-github"></i></a>
+               </div>
+            </div>
+         </div>
+
+      </div>
       </div>
    </section>
 </footer>
 
+<!-- LINK CSS -->
+<link rel="stylesheet" href="../Vista/css/pie.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>

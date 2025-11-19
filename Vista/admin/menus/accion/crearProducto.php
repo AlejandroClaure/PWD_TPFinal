@@ -98,11 +98,12 @@ $pronombreBD = $prefijo . $pronombre;
 // CREAR PRODUCTO
 // ========================================
 $datos = [
-    'pronombre' => $pronombreBD,
+    'pronombre' => $pronombre,
     'prodetalle' => $prodetalle,
     'procantstock' => $procantstock,
     'idusuario' => $usuario->getIdUsuario(),
-    'proimagen' => $imagenNombre
+    'proimagen' => $imagenNombre,
+    'categoria' => $categoria
 ];
 
 $abmProducto->crear($datos);
