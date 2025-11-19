@@ -45,7 +45,7 @@ include_once dirname(__DIR__, 2) . '/estructura/cabecera.php';
 
     <?php if ($ok == 1): ?>
         <div class="alert alert-success">Operación realizada correctamente.</div>
-    <?php elseif($ok == 0): ?>
+    <?php elseif($ok === "0"): ?>
         <div class="alert alert-danger">Ocurrió un error al realizar la operación.</div>
     <?php endif; ?>
 
@@ -163,7 +163,6 @@ include_once dirname(__DIR__, 2) . '/estructura/cabecera.php';
                                     <a href="accion/toggleVisibilidad.php?idmenu=<?= $p->getIdMenu(); ?>" class="btn btn-sm btn-outline-info">
                                         <?= $p->getMeDeshabilitado() ? "🚫" : "👁️" ?>
                                     </a>
-                                    <!-- EDITAR -->
                                     <a href="<?= $GLOBALS['VISTA_URL']; ?>admin/menus/editarMenu.php?idmenu=<?= $p->getIdMenu(); ?>" class="btn btn-sm btn-outline-warning">Editar</a>
                                     <a href="accion/eliminarMenu.php?idmenu=<?= $p->getIdMenu(); ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar sección?');">Eliminar</a>
                                 </div>
@@ -181,7 +180,6 @@ include_once dirname(__DIR__, 2) . '/estructura/cabecera.php';
                                                 <a href="accion/toggleVisibilidad.php?idmenu=<?= $h->getIdMenu(); ?>" class="btn btn-sm btn-outline-info">
                                                     <?= $h->getMeDeshabilitado() ? "🚫" : "👁️" ?>
                                                 </a>
-                                                <!-- EDITAR -->
                                                 <a href="<?= $GLOBALS['VISTA_URL']; ?>admin/menus/editarMenu.php?idmenu=<?= $h->getIdMenu(); ?>" class="btn btn-sm btn-outline-warning">Editar</a>
                                                 <a href="accion/eliminarMenu.php?idmenu=<?= $h->getIdMenu(); ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar sub-sección?');">Eliminar</a>
                                             </div>
