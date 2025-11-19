@@ -3,6 +3,12 @@ include_once __DIR__ . '/../../estructura/cabecera.php';
 include_once __DIR__ . '/../../../Control/AbmProducto.php';
 include_once __DIR__ . '/../../../Control/AbmMenu.php';
 
+// ================================
+//  Variables necesarias para el archivo generado
+// ================================
+$tipo = 'sub';
+$idPadre = 66;
+
 $abmProducto = new AbmProducto();
 $abmMenu = new AbmMenu();
 
@@ -24,6 +30,20 @@ foreach ($todos as $p) {
         $productos[] = $p;
     }
 }
+
+// ================================
+//  Incluir productos de subcategorías si existen
+// ================================
+$idPadreActual = $tipo === 'raiz' ? null : $idPadre;
+$hijos = $abmMenu->buscar(['idpadre' => $idPadreActual]);
+foreach ($hijos as $hijo) {
+    foreach ($todos as $p) {
+        $firstWord = explode(' ', trim($p->getProNombre()))[0];
+        if ($firstWord === $hijo->getMeNombre()) {
+            $productos[] = $p;
+        }
+    }
+}
 ?>
 <div class="container mt-4 pt-4">
     <h1 class="mb-4"><?php echo htmlspecialchars('Iphone'); ?></h1>
@@ -33,7 +53,6 @@ foreach ($todos as $p) {
         <?php else: ?>
             <?php foreach ($productos as $prod): ?>
                 <?php
-                // Mostrar solo lo que está después del último "_" (nombre visible)
                 $partes = explode('_', $prod->getProNombre());
                 $nombreVisible = end($partes);
                 ?>

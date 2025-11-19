@@ -57,6 +57,12 @@ include_once __DIR__ . '/__SALTO__../estructura/cabecera.php';
 include_once __DIR__ . '/__SALTO__../../Control/AbmProducto.php';
 include_once __DIR__ . '/__SALTO__../../Control/AbmMenu.php';
 
+// ================================
+//  Variables necesarias para el archivo generado
+// ================================
+$tipo = '__TIPO__';
+$idPadre = __IDPADRE__;
+
 $abmProducto = new AbmProducto();
 $abmMenu = new AbmMenu();
 
@@ -78,6 +84,20 @@ foreach ($todos as $p) {
         $productos[] = $p;
     }
 }
+
+// ================================
+//  Incluir productos de subcategorías si existen
+// ================================
+$idPadreActual = $tipo === 'raiz' ? null : $idPadre;
+$hijos = $abmMenu->buscar(['idpadre' => $idPadreActual]);
+foreach ($hijos as $hijo) {
+    foreach ($todos as $p) {
+        $firstWord = explode(' ', trim($p->getProNombre()))[0];
+        if ($firstWord === $hijo->getMeNombre()) {
+            $productos[] = $p;
+        }
+    }
+}
 ?>
 <div class="container mt-4 pt-4">
     <h1 class="mb-4"><?php echo htmlspecialchars('REPLACEMENOMBRE'); ?></h1>
@@ -87,7 +107,6 @@ foreach ($todos as $p) {
         <?php else: ?>
             <?php foreach ($productos as $prod): ?>
                 <?php
-                // Mostrar solo lo que está después del último "_" (nombre visible)
                 $partes = explode('_', $prod->getProNombre());
                 $nombreVisible = end($partes);
                 ?>
@@ -114,11 +133,15 @@ foreach ($todos as $p) {
 <?php include_once __DIR__ . '/__SALTO__../estructura/pie.php'; ?>
 PHP;
 
-// Reemplazos seguros dentro del contenido generado
+// ================================
+//  Reemplazos dinámicos
+// ================================
 $contenido = str_replace('__SALTO__', $saltoRuta, $contenido);
 $contenido = str_replace('__RUTA__', $ruta, $contenido);
-// Reemplazamos también el nombre mostrado (evita inyección de variables en el nowdoc)
 $contenido = str_replace('REPLACEMENOMBRE', addslashes($menombre), $contenido);
+$contenido = str_replace('__TIPO__', $tipo, $contenido);
+$contenido = str_replace('__IDPADRE__', is_numeric($idPadre) ? $idPadre : 'null', $contenido);
+
 
 // Guardar archivo físico
 file_put_contents($fullPath, $contenido);
