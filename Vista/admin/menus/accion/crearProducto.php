@@ -39,38 +39,47 @@ if (!empty($_FILES['proimagen']['name'])) {
 $abmProducto = new AbmProducto();
 $abmMenu = new AbmMenu();
 
-// Buscar si es categoría principal o subcategoría
+// Buscar menú de la categoría
 $menus = $abmMenu->buscar(['menombre' => $categoria]);
-$esSubcategoria = false;
-if (!empty($menus)) {
-    $menu = $menus[0];
-    $esSubcategoria = $menu->getObjMenuPadre() !== null;
+
+if (empty($menus)) {
+    header("Location: ../gestionMenus.php?ok=0");
+    exit;
 }
 
-// Crear producto
+$menuActual = $menus[0];
+
+// ================================
+// ARMAR CADENA COMPLETA DE CATEGORÍAS
+// ================================
+$cadenaCategorias = [];
+$menuTemp = $menuActual;
+
+while ($menuTemp) {
+    $cadenaCategorias[] = strtolower($menuTemp->getMeNombre());
+    $menuTemp = $menuTemp->getObjMenuPadre();
+}
+
+$cadenaCategorias = array_reverse($cadenaCategorias);
+
+// Prefijo estilo: "celulares_iphone_ "
+$prefijo = implode('_', $cadenaCategorias) . '_ ';
+
+// Nombre real guardado en BD
+$pronombreBD = $prefijo . $pronombre;
+
+// ================================
+// CREAR PRODUCTO
+// ================================
 $datos = [
-    'pronombre' => $pronombre,
+    'pronombre' => $pronombreBD,
     'prodetalle' => $prodetalle,
     'procantstock' => $procantstock,
     'idusuario' => $usuario->getIdUsuario(),
-    'proimagen' => $imagenNombre,
-    'categoria' => $categoria
+    'proimagen' => $imagenNombre
 ];
 
 $abmProducto->crear($datos);
-
-// --------------------------------------------------
-// Si es categoría principal, también asignar productos a sus subcategorías
-// --------------------------------------------------
-if (!$esSubcategoria && isset($hijosMap)) {
-    // Obtener subcategorías de esta categoría
-    $subcategorias = $abmMenu->buscar(['idpadre' => $menu->getIdMenu()]);
-    foreach ($subcategorias as $sub) {
-        $subNombre = $sub->getMeNombre();
-        // Opción: duplicar el producto en cada subcategoría
-        // Si no quieres duplicar, solo se filtra correctamente al mostrar productos
-    }
-}
 
 header("Location: ../gestionMenus.php?ok=1");
 exit;
