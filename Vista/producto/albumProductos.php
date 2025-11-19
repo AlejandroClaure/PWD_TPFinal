@@ -5,10 +5,6 @@ ini_set('display_errors', 1);
 
 // Validar sesión
 $session = new Session();
-if (!$session->activa()) {
-    header("Location: " . $GLOBALS['VISTA_URL'] . "login/login.php?error=2");
-    exit;
-}
 
 // Incluir AbmProducto
 include_once $GLOBALS['CONTROL_PATH'] . 'AbmProducto.php';

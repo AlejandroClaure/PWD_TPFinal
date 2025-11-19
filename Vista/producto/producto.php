@@ -4,10 +4,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 $session = new Session();
-if (!$session->activa()) {
-    header("Location: " . $GLOBALS['VISTA_URL'] . "login/login.php?error=2");
-    exit;
-}
+
 ?>
 
 <?php include_once '../estructura/cabecera.php'; ?>
