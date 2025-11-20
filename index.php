@@ -16,13 +16,13 @@ include_once $GLOBALS['VISTA_PATH'].'estructura/cabecera.php';
    <!-- Imágenes -->
    <div class="carousel-inner">
       <div class="carousel-item active">
-         <img src="Vista/imagenes/carousel01.jpg" class="d-block w-100" alt="promo iphone">
+         <img src="Vista/imagenes/carousel/carousel01.jpg" class="d-block w-100" alt="promo iphone">
       </div>
       <div class="carousel-item">
-         <img src="Vista/imagenes/carousel02.png" class="d-block w-100" alt="samsungF54">
+         <img src="Vista/imagenes/carousel/carousel02.png" class="d-block w-100" alt="samsungF54">
       </div>
       <div class="carousel-item">
-         <img src="Vista/imagenes/carousel03.jpg" class="d-block w-100" alt="samsungS25">
+         <img src="Vista/imagenes/carousel/carousel03.jpg" class="d-block w-100" alt="samsungS25">
       </div>
    </div>
 

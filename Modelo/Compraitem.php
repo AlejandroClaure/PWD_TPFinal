@@ -23,7 +23,7 @@ class CompraItem extends BaseDatos {
         $this->setCiCantidad($cicantidad);
     }
 
-    // GETTERS Y SETTERS
+    
     public function getIdCompraItem() { return $this->idcompraitem; }
     public function setIdCompraItem($valor) { $this->idcompraitem = $valor; }
 

@@ -1,5 +1,6 @@
 <?php
 include_once '../../configuracion.php';
+include_once '../../configuracion.php';
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -11,9 +12,8 @@ include_once $GLOBALS['CONTROL_PATH'] . 'AbmProducto.php';
 $abmProducto = new AbmProducto();
 $productos = $abmProducto->listar();
 
-// ======================
+
 // Funciones auxiliares
-// ======================
 function normalizar_nombre_img($nombre) {
     $tmp = trim($nombre);
     // pasar a minúsculas
@@ -67,9 +67,8 @@ function detectar_imagenes_ruta_base() {
     return ['dir' => $gDir, 'baseUrl' => $gImg];
 }
 
-// ======================
+
 // Detectar rutas
-// ======================
 $imgInfo = detectar_imagenes_ruta_base();
 $imgDir = rtrim($imgInfo['dir'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 $imgBaseUrl = rtrim($imgInfo['baseUrl'], '/') . '/';

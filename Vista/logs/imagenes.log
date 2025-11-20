@@ -113,6 +113,8 @@ Nombre base generado: iphone_12
 Buscando en dir: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\
 Base URL candidata: /PWD_TPFinal/Vista/imagenes/
 Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\iphone_12.jpg ... ENCONTRADO
+<<<<<<< HEAD
+=======
 
 ----- Producto: xiaomi 13 -----
 Nombre base generado: xiaomi_13
@@ -125,54 +127,7 @@ Nombre base generado: s25_ultra
 Buscando en dir: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\
 Base URL candidata: /PWD_TPFinal/Vista/imagenes/
 Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\s25_ultra.jpg ... ENCONTRADO
-
------ Producto: s25 ultra -----
-Nombre base generado: s25_ultra
-Buscando en dir: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\
-Base URL candidata: /PWD_TPFinal/Vista/imagenes/
-Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\s25_ultra.jpg ... ENCONTRADO
-
------ Producto: xiaomi 13 -----
-Nombre base generado: xiaomi_13
-Buscando en dir: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\
-Base URL candidata: /PWD_TPFinal/Vista/imagenes/
-Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\xiaomi_13.jpg ... ENCONTRADO
-
------ Producto: xiaomi 13 -----
-Nombre base generado: xiaomi_13
-Buscando en dir: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\
-Base URL candidata: /PWD_TPFinal/Vista/imagenes/
-Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\xiaomi_13.jpg ... ENCONTRADO
-
------ Producto: iphone 12 -----
-Nombre base generado: iphone_12
-Buscando en dir: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\
-Base URL candidata: /PWD_TPFinal/Vista/imagenes/
-Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\iphone_12.jpg ... ENCONTRADO
-
------ Producto: s25 ultra -----
-Nombre base generado: s25_ultra
-Buscando en dir: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\
-Base URL candidata: /PWD_TPFinal/Vista/imagenes/
-Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\s25_ultra.jpg ... ENCONTRADO
-
------ Producto: xiaomi 13 -----
-Nombre base generado: xiaomi_13
-Buscando en dir: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\
-Base URL candidata: /PWD_TPFinal/Vista/imagenes/
-Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\xiaomi_13.jpg ... ENCONTRADO
-
------ Producto: s25 ultra -----
-Nombre base generado: s25_ultra
-Buscando en dir: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\
-Base URL candidata: /PWD_TPFinal/Vista/imagenes/
-Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\s25_ultra.jpg ... ENCONTRADO
-
------ Producto: iphone 12 -----
-Nombre base generado: iphone_12
-Buscando en dir: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\
-Base URL candidata: /PWD_TPFinal/Vista/imagenes/
-Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\iphone_12.jpg ... ENCONTRADO
+>>>>>>> f371c90bdbcdbac5c1afcfaed7a37b01f6e19e58
 
 ----- Producto: iphone 12 -----
 Nombre base generado: iphone_12

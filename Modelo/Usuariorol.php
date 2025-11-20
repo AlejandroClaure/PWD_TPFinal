@@ -70,13 +70,13 @@ class Usuariorol extends BaseDatos
                 $obj2->cargar();  // Esto carga los datos del rol
                 
                 $this->setear($obj1, $obj2);
-                $resp = true;  // ← ¡AHORA SÍ DEVUELVE TRUE!
+                $resp = true; 
             }
         } else {
             $this->setMensajeOperacion("UsuarioRol->cargar: " . $this->getError());
         }
     }
-    return $resp;  // ← Ahora sí funciona
+    return $resp;  
 }
 
     public function insertar()
@@ -109,7 +109,7 @@ class Usuariorol extends BaseDatos
            " AND idusuario =" . $this->getObjUsuario()->getIdUsuario() . ";";
     
     if ($this->Iniciar()) {
-        if ($this->Ejecutar($sql) > -1) {  // ← Cambiado: Ejecutar devuelve filas afectadas
+        if ($this->Ejecutar($sql) > -1) {  // Ejecutar devuelve filas afectadas
             $resp = true;
         } else {
             $this->setMensajeOperacion("UsuarioRol->eliminar: " . $this->getError());

@@ -25,9 +25,7 @@ class Usuario extends BaseDatos {
         $this->roles = [];
     }
 
-    // ============================================================
-    // SETEAR
-    // ============================================================
+    
     public function setear($idusuario, $usnombre, $uspass, $usmail, $usdeshabilitado) {
         $this->setIdUsuario($idusuario);
         $this->setUsNombre($usnombre);
@@ -36,9 +34,7 @@ class Usuario extends BaseDatos {
         $this->setUsDeshabilitado($usdeshabilitado);
     }
 
-    // ============================================================
-    // GETTERS Y SETTERS
-    // ============================================================
+   
     public function getIdUsuario() { return $this->idusuario; }
     public function setIdUsuario($idusuario) { $this->idusuario = $idusuario; }
 
@@ -57,9 +53,6 @@ class Usuario extends BaseDatos {
     public function getMensajeOperacion() { return $this->mensajeoperacion; }
     public function setMensajeOperacion($valor) { $this->mensajeoperacion = $valor; }
 
-    // ============================================================
-    // ROLES
-    // ============================================================
     public function getRoles() { return $this->roles; }
     public function setRoles($roles) { $this->roles = $roles; }
 
@@ -84,9 +77,7 @@ class Usuario extends BaseDatos {
         }
     }
 
-    // ============================================================
-    // CARGAR UNO
-    // ============================================================
+    
     public function cargar() {
         $resp = false;
         $sql = "SELECT * FROM usuario WHERE idusuario = " . $this->getIdUsuario();
@@ -170,9 +161,7 @@ public function insertar() {
         return $resp;
     }
 
-    // ============================================================
-    // ELIMINAR
-    // ============================================================
+   
     public function eliminar() {
         $resp = false;
         $sql = "DELETE FROM usuario WHERE idusuario=" . $this->getIdUsuario();
@@ -187,9 +176,6 @@ public function insertar() {
         return $resp;
     }
 
-    // ============================================================
-    // LISTAR MUCHOS
-    // ============================================================
     public function listar($parametro = "") {
         $arreglo = [];
         $sql = "SELECT * FROM usuario ";
@@ -217,9 +203,7 @@ public function insertar() {
         return $arreglo;
     }
 
-    // ============================================================
-    // BUSCAR (DEVUELVE ARRAY)
-    // ============================================================
+    
     public function buscar($param) {
         $where = " true ";
         if (isset($param['idusuario'])) {

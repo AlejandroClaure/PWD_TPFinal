@@ -8,17 +8,14 @@ class Venta {
         $this->db = new BaseDatos();
     }
 
-    /**
-     * Crea una nueva compra para un usuario
-     */
+   
     public function nuevaCompra($idusuario) {
         $sql = "INSERT INTO compra (idusuario) VALUES ($idusuario)";
         return $this->db->Ejecutar($sql);
     }
 
-    /**
-     * Inserta los productos en compraitem
-     */
+    //Inserta los productos en compraitem
+     
     public function agregarItem($idcompra, $idproducto, $cantidad) {
         $sql = "INSERT INTO compraitem (idproducto, idcompra, cicantidad)
                 VALUES ($idproducto, $idcompra, $cantidad)";
@@ -44,9 +41,9 @@ class Venta {
         return $this->db->Ejecutar($sql);
     }
 
-    /**
-     * Obtiene datos generales de la compra
-     */
+    
+    //Obtiene datos generales de la compra
+    
     public function getCompra($idcompra) {
         $sql = "SELECT c.idcompra, c.cofecha, u.usnombre, u.usmail
                 FROM compra c
@@ -59,9 +56,9 @@ class Venta {
         return null;
     }
 
-    /**
-     * Devuelve los items de una compra
-     */
+    
+   //Devuelve los items de una compra
+    
     public function getItems($idcompra) {
         $sql = "SELECT p.pronombre, p.prodetalle, ci.cicantidad
                 FROM compraitem ci

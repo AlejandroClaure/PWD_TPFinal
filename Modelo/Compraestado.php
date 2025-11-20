@@ -26,7 +26,7 @@ class CompraEstado extends BaseDatos {
         $this->setCeFechaFin($fechafin);
     }
 
-    // GETTERS Y SETTERS
+    
     public function getIdCompraEstado() { return $this->idcompraestado; }
     public function setIdCompraEstado($v) { $this->idcompraestado = $v; }
     public function getObjCompra() { return $this->objCompra; }

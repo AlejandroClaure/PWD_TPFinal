@@ -29,7 +29,7 @@ class Producto extends BaseDatos
         $this->prodeshabilitado = $prodeshabilitado;
         $this->idusuario = $idusuario;
     }
-    // Getters
+    
     public function getIdProducto()
     {
         return $this->idproducto;
@@ -55,8 +55,7 @@ class Producto extends BaseDatos
         return $this->idusuario;
     }
 
-    // SETTERS
-
+    
     public function setIdProducto($idproducto)
     {
         $this->idproducto = $idproducto;

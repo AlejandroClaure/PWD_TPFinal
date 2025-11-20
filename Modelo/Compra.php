@@ -20,7 +20,7 @@ class Compra extends BaseDatos {
         $this->setIdUsuario($idusuario);
     }
 
-    // GETTERS / SETTERS
+    
     public function getIdCompra() { return $this->idcompra; }
     public function setIdCompra($valor) { $this->idcompra = $valor; }
 

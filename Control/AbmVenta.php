@@ -2,9 +2,7 @@
 
 class AbmVenta {
 
-    // =====================================================
-    // REGISTRA UNA COMPRA
-    // =====================================================
+   
     public function registrarVenta($idusuario, $carrito) {
         $db = new BaseDatos();
         if (!$db->Iniciar()) return false;
@@ -54,9 +52,8 @@ class AbmVenta {
         }
     }
 
-    // =====================================================
+    
     // DEVUELVE UNA COMPRA COMPLETA
-    // =====================================================
     public function obtenerCompra($idcompra) {
         $db = new BaseDatos();
 
@@ -73,9 +70,8 @@ class AbmVenta {
         return null;
     }
 
-    // =====================================================
+    
     // DEVUELVE LOS PRODUCTOS DE UNA COMPRA
-    // =====================================================
     public function obtenerItems($idcompra) {
         $db = new BaseDatos();
         $sql = "
@@ -97,9 +93,8 @@ class AbmVenta {
     }
 
 
-    // =====================================================
+    
     // CAMBIA EL ESTADO DE UNA COMPRA
-    // =====================================================
     public function cambiarEstado($idcompra, $nuevoEstado) {
         $db = new BaseDatos();
         if (!$db->Iniciar()) return false;
@@ -122,9 +117,8 @@ class AbmVenta {
     }
 
 
-    // =====================================================
+    
     // LISTAR TODAS LAS COMPRAS (ADMIN)
-    // =====================================================
     public function listarCompras() {
         $db = new BaseDatos();
 

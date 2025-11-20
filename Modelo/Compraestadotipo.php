@@ -20,7 +20,7 @@ class CompraEstadoTipo extends BaseDatos {
         $this->setCetDetalle($detalle);
     }
 
-    // GETTERS Y SETTERS
+    
     public function getIdCompraEstadoTipo() { return $this->idcompraestadotipo; }
     public function setIdCompraEstadoTipo($valor) { $this->idcompraestadotipo = $valor; }
     public function getCetDescripcion() { return $this->cetdescripcion; }
