@@ -16,9 +16,8 @@ if (!isset($_SESSION['carrito'])) {
 }
 $carrito =& $_SESSION['carrito'];
 
-// ==========================
+
 // Funciones auxiliares
-// ==========================
 function normalizar_nombre_img($nombre) {
     $tmp = trim($nombre);
     $tmp = mb_strtolower($tmp, 'UTF-8');
@@ -50,9 +49,8 @@ $imgInfo = detectar_imagenes_ruta_base();
 $imgDir = rtrim($imgInfo['dir'], '/') . '/';
 $imgBaseUrl = rtrim($imgInfo['baseUrl'], '/') . '/';
 
-// ==========================
+
 // Modificar cantidad
-// ==========================
 if (isset($_GET['id']) && isset($_GET['accion'])) {
     $idProducto = $_GET['id'];
     $accion = $_GET['accion'];
@@ -84,9 +82,8 @@ if (isset($_GET['id']) && isset($_GET['accion'])) {
     exit;
 }
 
-// ==========================
+
 // Eliminar producto
-// ==========================
 if (isset($_GET['eliminar'])) {
     $idEliminar = $_GET['eliminar'];
     if (isset($carrito[$idEliminar])) {
@@ -96,9 +93,8 @@ if (isset($_GET['eliminar'])) {
     }
 }
 
-// ==========================
+
 // Totales
-// ==========================
 $subtotal = 0;
 foreach ($carrito as $item) {
     $subtotal += floatval($item['precio']) * intval($item['cantidad']);
@@ -180,6 +176,10 @@ $total = $subtotal + $envio;
             <p><strong>Subtotal:</strong> $<?= number_format($subtotal, 2, ',', '.'); ?></p>
             <p><strong>Envío:</strong> $<?= number_format($envio, 2, ',', '.'); ?></p>
             <p class="fs-4"><strong>Total:</strong> $<?= number_format($total, 2, ',', '.'); ?></p>
+
+            <a href="../producto/producto.php" class="btn btn-dark btn-lg me-2">
+                Seguir Comprando
+            </a>
 
             <a href="../compra/finalizarCompra.php" class="btn btn-success btn-lg">
                 Finalizar Compra

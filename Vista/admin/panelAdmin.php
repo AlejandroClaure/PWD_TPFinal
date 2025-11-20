@@ -35,35 +35,39 @@ include_once "../estructura/cabecera.php";
 
         <!-- GESTIÓN DE USUARIOS -->
         <div class="col-md-4 mb-4">
-            <div class="card shadow-sm h-100">
+            <div class="card h-100 d-flex flex-column">
                 <div class="card-body">
                     <h5 class="card-title">Usuarios</h5>
                     <p class="card-text">Alta, baja y modificación de usuarios del sistema.</p>
-                    <a href="usuario/gestionUsuarios.php" class="btn btn-primary w-100">Administrar Usuarios</a>
+                    <div class="card-footer bg-white border-0 mt-auto">
+                        <a href="<?= $GLOBALS['VISTA_URL']; ?>admin/usuario/gestionUsuarios.php" class="btn btn-primary w-100">Administrar Usuarios</a>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- GESTIÓN DE ROLES -->
         <div class="col-md-4 mb-4">
-            <div class="card shadow-sm h-100">
+            <div class="card h-100 d-flex flex-column">
                 <div class="card-body">
                     <h5 class="card-title">Roles</h5>
                     <p class="card-text">Configurar roles y permisos asociados.</p>
-                    <a href="roles/panelRoles.php" class="btn btn-success w-100">Administrar Roles</a>
+                    <div class="card-footer bg-white border-0 mt-auto">
+                        <a href="roles/panelRoles.php" class="btn btn-success w-100">Administrar Roles</a>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- GESTIÓN DE MENÚS -->
         <div class="col-md-4 mb-4">
-            <div class="card shadow-sm h-100">
+            <div class="card h-100 d-flex flex-column">
                 <div class="card-body">
                     <h5 class="card-title">Menús dinámicos</h5>
-                    <p class="card-text">
-                        Crear, editar y organizar el menú visible según los roles asignados.
-                    </p>
-                    <a href="menus/gestionMenus.php" class="btn btn-info w-100">Administrar Menús</a>
+                    <p class="card-text">Crear, editar y organizar el menú visible según los roles asignados.</p>
+                    <div class="card-footer bg-white border-0 mt-auto">
+                        <a href="menus/gestionMenus.php" class="btn btn-info w-100">Administrar Menús</a>
+                    </div>
                 </div>
             </div>
         </div>
