@@ -95,7 +95,7 @@ include_once "../estructura/cabecera.php";
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <h5 class="card-title"><?= htmlspecialchars($menu->getMeNombre()); ?></h5>
-                        <p class="card-text"><?= htmlspecialchars($menu->getMeDescripcion()); ?></p>
+                        <!--  <p class="card-text"><?= htmlspecialchars($menu->getMeDescripcion()); ?></p>-->
 
                         <?php if (!empty($menu->getMeDescripcion())): ?>
                             <a href="<?= $GLOBALS['VISTA_URL'] . 'secciones/' . htmlspecialchars($menu->getMeDescripcion()); ?>" class="btn btn-outline-primary w-100">

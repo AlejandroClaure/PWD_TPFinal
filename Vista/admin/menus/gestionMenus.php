@@ -159,7 +159,7 @@ include_once dirname(__DIR__, 2) . '/estructura/cabecera.php';
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <strong><?= $p->getMeNombre(); ?></strong>
-                                    <div class="small text-muted"><?= $p->getMeDescripcion(); ?></div>
+                                   <!-- <div class="small text-muted"><?= $p->getMeDescripcion(); ?></div>-->
                                 </div>
                                 <div class="btn-group">
                                     <a href="accion/toggleVisibilidad.php?idmenu=<?= $p->getIdMenu(); ?>" class="btn btn-sm btn-outline-info">
@@ -176,7 +176,7 @@ include_once dirname(__DIR__, 2) . '/estructura/cabecera.php';
                                         <li class="d-flex justify-content-between align-items-center">
                                             <div>
                                                 <?= $h->getMeNombre(); ?>
-                                                <div class="small text-muted"><?= $h->getMeDescripcion(); ?></div>
+                                                <!-- <div class="small text-muted"><?= $h->getMeDescripcion(); ?></div>-->
                                             </div>
                                             <div class="btn-group">
                                                 <a href="accion/toggleVisibilidad.php?idmenu=<?= $h->getIdMenu(); ?>" class="btn btn-sm btn-outline-info">

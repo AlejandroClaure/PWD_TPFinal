@@ -131,7 +131,7 @@ if (!file_exists($logFile)) file_put_contents($logFile, "=== LOG DE BUSQUEDA DE 
 ?>
 
 <div class="container mt-4 pt-4">
-    <h1 class="mb-4"><?= htmlspecialchars('Xiaomi'); ?></h1>
+    <h1 class="mb-4">Xiaomi</h1>
 
     <div class="row g-3">
         <?php if (empty($productos)): ?>

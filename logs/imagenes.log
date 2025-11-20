@@ -410,14 +410,56 @@ Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\ipad_air.jpg ... no existe
 Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\ipad_air.jpeg ... no existe
 Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\ipad_air.png ... ENCONTRADO
 
------ Producto: xiaomi 13 -----
-Nombre base generado: xiaomi_13
+----- Producto: iphone 12 -----
+Nombre base generado: iphone_12
 Buscando en dir: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\
 Base URL candidata: /PWD_TPFinal/Vista/imagenes/
-Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\xiaomi_13.jpg ... ENCONTRADO
+Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\iphone_12.jpg ... ENCONTRADO
 
------ Producto: s25 ultra -----
-Nombre base generado: s25_ultra
+----- Producto: ipad air -----
+Nombre base generado: ipad_air
 Buscando en dir: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\
 Base URL candidata: /PWD_TPFinal/Vista/imagenes/
-Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\s25_ultra.jpg ... ENCONTRADO
+Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\ipad_air.jpg ... no existe
+Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\ipad_air.jpeg ... no existe
+Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\ipad_air.png ... ENCONTRADO
+
+----- Producto: iphone 12 -----
+Nombre base generado: iphone_12
+Buscando en dir: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\
+Base URL candidata: /PWD_TPFinal/Vista/imagenes/
+Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\iphone_12.jpg ... ENCONTRADO
+
+----- Producto: ipad air -----
+Nombre base generado: ipad_air
+Buscando en dir: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\
+Base URL candidata: /PWD_TPFinal/Vista/imagenes/
+Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\ipad_air.jpg ... no existe
+Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\ipad_air.jpeg ... no existe
+Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\ipad_air.png ... ENCONTRADO
+
+----- Producto: xiaomi redmi note 13 -----
+Nombre base generado: xiaomi_redmi_note_13
+Buscando en dir: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\
+Base URL candidata: /PWD_TPFinal/Vista/imagenes/
+Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\xiaomi_redmi_note_13.jpg ... ENCONTRADO
+
+----- Producto: iphone 12 -----
+Nombre base generado: iphone_12
+Buscando en dir: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\
+Base URL candidata: /PWD_TPFinal/Vista/imagenes/
+Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\iphone_12.jpg ... ENCONTRADO
+
+----- Producto: ipad air -----
+Nombre base generado: ipad_air
+Buscando en dir: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\
+Base URL candidata: /PWD_TPFinal/Vista/imagenes/
+Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\ipad_air.jpg ... no existe
+Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\ipad_air.jpeg ... no existe
+Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\ipad_air.png ... ENCONTRADO
+
+----- Producto: xiaomi redmi note 13 -----
+Nombre base generado: xiaomi_redmi_note_13
+Buscando en dir: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\
+Base URL candidata: /PWD_TPFinal/Vista/imagenes/
+Probando: C:\xampp\htdocs\PWD_TPFinal\Vista\imagenes\xiaomi_redmi_note_13.jpg ... ENCONTRADO
