@@ -7,7 +7,9 @@ $session = new Session();
 
 ?>
 
+
 <?php include_once '../estructura/cabecera.php'; ?>
+
 
 <main class="mt-5 pt-5">
   <section class="container py-5">

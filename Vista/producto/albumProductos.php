@@ -107,9 +107,9 @@ $imgBaseUrl = rtrim($imgInfo['baseUrl'], '/') . '/';
         $stock  = (int) $prod->getProCantStock();
     ?>
     <div class="col-md-4 col-lg-3">
-        <div class="card shadow-sm h-100">
+        <div class="card shadow-sm h-100 product-card">
             <img src="<?= htmlspecialchars($imagenURL, ENT_QUOTES); ?>"
-                 class="card-img-top"
+                 class="card-img-top producto-img"
                  alt="<?= htmlspecialchars($nombreVisible, ENT_QUOTES); ?>"
                  onerror="this.src='<?= $imgBaseUrl; ?>no-image.jpeg';">
             <div class="card-body">

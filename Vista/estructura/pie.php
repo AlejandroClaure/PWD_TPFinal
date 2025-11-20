@@ -1,7 +1,7 @@
 <footer class="mt-5">
-   <section class="py-5 bg-light">
+   <section class="py-3 bg-light">
       <div class="container">
-         <div class="row text-center mb-5">
+         <div class="row text-center mb-3">
             <div class="col-12">
                <h2 class="section-title">Grupo 3 - PWD 2025</h2>
                <p class="text-muted">Trabajo Final Integrador</p>
@@ -12,11 +12,11 @@
 
          <!-- Integrante 1 -->
          <div class="col-lg-3 col-md-6">
-            <div class="team-member text-center p-4">
+            <div class="team-member text-center p-3">
                <img src="<?= $GLOBALS['IMG_URL'] ?>perfilEstudiante1.jpg"
                      alt="Alejandro Claure"
-                     class="mb-4 shadow rounded-circle"
-                     width="120" height="120">
+                     class="mb-3 shadow rounded-circle"
+                     width="110" height="110">
 
                <h5 class="mb-1">Alejandro Claure</h5>
                <p class="text-muted mb-3">Estudiante</p>

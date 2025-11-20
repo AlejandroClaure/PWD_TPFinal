@@ -21,3 +21,11 @@
 .btn-success:hover {
   background-color: #157347;
 }
+
+.producto-img {
+    height: 250px;        /* Altura uniforme */
+    object-fit: contain;  /* No deformar */
+    width: 100%;
+    padding: 10px;
+    background: #fff;
+}

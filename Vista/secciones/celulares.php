@@ -186,9 +186,9 @@ if (!file_exists($logFile)) file_put_contents($logFile, "=== LOG DE BUSQUEDA DE 
             ?>
 
             <div class="col-md-4 col-lg-3">
-                <div class="card shadow-sm h-100">
+                <div class="card shadow-sm h-100 producto-img">
                     <img src="<?= htmlspecialchars($imagenURL, ENT_QUOTES); ?>"
-                         class="card-img-top"
+                         class="card-img-top producto-img"
                          alt="<?= htmlspecialchars($nombreReal, ENT_QUOTES); ?>"
                          onerror="this.src='<?= htmlspecialchars($imgBaseUrl . 'no-image.jpeg', ENT_QUOTES); ?>';">
 
