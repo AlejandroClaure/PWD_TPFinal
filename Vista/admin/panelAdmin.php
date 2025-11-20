@@ -40,7 +40,7 @@ include_once "../estructura/cabecera.php";
                     <h5 class="card-title">Usuarios</h5>
                     <p class="card-text">Alta, baja y modificación de usuarios del sistema.</p>
                     <div class="card-footer bg-white border-0 mt-auto">
-                        <a href="<?= $GLOBALS['VISTA_URL']; ?>usuarios/listarUsuarios.php" class="btn btn-primary w-100">Administrar Usuarios</a>
+                        <a href="<?= $GLOBALS['VISTA_URL']; ?>admin/usuario/gestionUsuarios.php" class="btn btn-primary w-100">Administrar Usuarios</a>
                     </div>
                 </div>
             </div>
