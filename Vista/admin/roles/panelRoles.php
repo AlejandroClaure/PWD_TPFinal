@@ -33,8 +33,8 @@ $listaUsuarios = $abmUsuario->buscar([]);
 <div class="container mt-5 pt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Administración de Roles</h2>
-        <a href="<?= $GLOBALS['BASE_URL']; ?>" class="btn btn-secondary">
-            <i class="fa fa-arrow-left"></i> Volver al inicio
+        <a href="<?= $GLOBALS['VISTA_URL']; ?>admin/panelAdmin.php" class="btn btn-secondary">
+            <i class="fa fa-arrow-left"></i> Volver
         </a>
     </div>
 
