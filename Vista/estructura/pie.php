@@ -52,7 +52,7 @@
 </footer>
 
 <!-- LINK CSS -->
-<link rel="stylesheet" href="../Vista/css/pie.css">
+<link rel="stylesheet" href="<?= $GLOBALS['VISTA_URL'] ?>css/pie.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>

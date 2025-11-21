@@ -48,7 +48,7 @@ foreach ($menus as $m) {
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>Celulandia</title>
    <!-- Icono de la página -->
-   <link rel="icon" type="image/x-icon" href="./Vista/imagenes/icon.ico">
+   <link rel="icon" type="image/x-icon" href="<?= $GLOBALS['VISTA_URL']; ?>imagenes/icon.ico">
 
    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -100,7 +100,7 @@ foreach ($menus as $m) {
                   <?php if ($usuario && in_array("admin", $rolesUsuario)): ?>
                      <li class="nav-item">
                         <a class="nav-link text-warning fw-bold"
-                           href="<?= $GLOBALS['VISTA_URL']; ?>admin/panelAdmin.php">
+                           href="<?= $GLOBALS['VISTA_URL']; ?>panelAdmin.php">
                            <i class="fa fa-bars"></i> Administrar Paneles
                         </a>
                      </li>
@@ -185,6 +185,6 @@ foreach ($menus as $m) {
 </div>
 
 
-   <div style="padding-top: 90px;"></div>
+   <div style="padding-top: 60px;"></div>
 
    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

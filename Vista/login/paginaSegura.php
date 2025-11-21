@@ -40,7 +40,7 @@ include_once "../estructura/cabecera.php";
                     <div class="card-body">
                         <h5 class="card-title">Administración</h5>
                         <p class="card-text">Gestión completa del sistema.</p>
-                        <a href="../admin/panelAdmin.php" class="btn btn-primary w-100">Entrar</a>
+                        <a href="../panelAdmin.php" class="btn btn-primary w-100">Entrar</a>
                     </div>
                 </div>
             </div>

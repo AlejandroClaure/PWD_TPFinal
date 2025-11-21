@@ -2,7 +2,9 @@
 include_once 'configuracion.php';
 include_once $GLOBALS['VISTA_PATH'].'estructura/cabecera.php';
 ?>
-<main class="mt-5 pt-5">
+   <link rel="stylesheet" href="<?= $GLOBALS['CSS_URL']; ?>index.css">
+
+<main>
 
 <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
 

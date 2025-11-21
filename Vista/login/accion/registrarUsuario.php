@@ -9,7 +9,7 @@ $param["usnombre"] = $_POST["usnombre"];
 $param["usmail"]   = $_POST["usmail"];
 $param["uspass"]   = $_POST["uspass"];
 
-// Registrar usuario → AHORA devuelve el ID (gracias a la corrección en AbmUsuario)
+// Registrar usuario 
 $idUsuario = $abm->registrar($param);
 
 if ($idUsuario !== false) {
