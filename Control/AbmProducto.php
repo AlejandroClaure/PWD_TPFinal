@@ -144,6 +144,22 @@ class AbmProducto
         $obj = new Producto();
         return $obj->listar("prodeshabilitado IS NULL");
     }
+ // ======================================================
+    // LISTAR TODOS (PASAR NULL)
+    // ======================================================
+    public function listarTodo($estado = 'habilitados')
+    {
+        $producto = new Producto();
+
+        switch ($estado) {
+            case 'habilitados':
+                return $producto->listar("prodeshabilitado IS NULL");
+            case 'deshabilitados':
+                return $producto->listar("prodeshabilitado IS NOT NULL");
+            default: // null o cualquier otro -> todos
+                return $producto->listar(); // sin condición
+        }
+    }
 
     // ======================================================
     // LISTAR POR USUARIO

@@ -62,6 +62,44 @@ class Rol extends BaseDatos {
         return $resp;
     }
 
+    /**
+ * Busca roles según parámetros
+ * Totalmente compatible con tu clase BaseDatos que extiende PDO
+ */
+public function buscar($param = [])
+{
+    $where = " true ";
+    if ($param != null) {
+        if (isset($param['idrol'])) {
+            $where .= " AND idrol = " . intval($param['idrol']);
+        }
+        if (isset($param['rodescripcion'])) {
+            // Usamos $this->quote() → método nativo y seguro de PDO
+            $desc = $this->quote($param['rodescripcion']);
+            $where .= " AND rodescripcion = $desc";
+        }
+    }
+
+    $arreglo = array();
+    $sql = "SELECT * FROM rol WHERE " . $where;
+
+    if ($this->Iniciar()) {
+        $res = $this->Ejecutar($sql);
+        if ($res > -1) {
+            if ($res > 0) {
+                while ($row = $this->Registro()) {
+                    $obj = new Rol();
+                    $obj->setear($row['idrol'], $row['rodescripcion']);
+                    $arreglo[] = $obj;
+                }
+            }
+        } else {
+            $this->setMensajeOperacion("Rol->buscar: " . $this->getError());
+        }
+    }
+    return $arreglo;
+}
+
     
     public function insertar() {
         $resp = false;

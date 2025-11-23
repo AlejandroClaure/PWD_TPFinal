@@ -101,7 +101,7 @@ include_once dirname(__DIR__, 1) . '/estructura/cabecera.php';
     <div class="card mb-4">
         <div class="card-header bg-success text-white">Agregar nuevo producto</div>
         <div class="card-body">
-            <form action="accion/accionCrearProducto.php" method="POST" enctype="multipart/form-data">
+            <form action="../producto/accion/accionCrearProducto.php" method="POST" enctype="multipart/form-data">
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label>Nombre</label>
@@ -207,158 +207,159 @@ include_once dirname(__DIR__, 1) . '/estructura/cabecera.php';
         </div>
     </div>
 
-    <!-- ================= GESTIÓN DE STOCK CON AJAX  ================= -->
-    <div class="card mb-4">
-        <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
-            <strong>Control de Stock en Tiempo Real</strong>
-            <small class="text-success" id="mensajeAjax"></small>
-        </div>
-        <div class="card-body">
-            <?php
-            if (!isset($abmProducto)) {
-                $abmProducto = new AbmProducto();
-            }
-            $todosLosProductos = $abmProducto->listar() ?? [];
-            ?>
+<!-- ================= GESTIÓN DE PRODUCTOS EXISTENTES ================= -->
+<!-- ================= GESTIÓN DE PRODUCTOS EXISTENTES ================= -->
+<div class="card mt-5 shadow-sm border-0">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">
+            <i class="fa fa-boxes me-2"></i> Gestión de Productos Existentes
+        </h4>
+    </div>
+    <div class="card-body p-0">
 
-            <?php if (empty($todosLosProductos)): ?>
-                <p class="text-muted">No hay productos registrados todavía.</p>
-            <?php else: ?>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle" id="tablaStock">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>#</th>
-                                <th>Producto</th>
-                                <th>Detalle (Precio de los productos)</th>
-                                <th class="text-center">Stock</th>
-                                <th class="text-center">Acciones Rápidas</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($todosLosProductos as $prod): ?>
-                                <tr data-id="<?= $prod->getIdProducto(); ?>">
-                                    <td><?= $prod->getIdProducto(); ?></td>
-                                    <td><strong><?= htmlspecialchars($prod->getProNombre()); ?></strong></td>
+        <?php
+        $abmProducto = new AbmProducto();
+        $productos = $abmProducto->listarTodo(null); // null = trae TODOS (habilitados + deshabilitados)
 
-                                    <td>
-                                        <input type="text"
-                                            class="form-control form-control-sm"
-                                            value="<?= htmlspecialchars($prod->getProDetalle()); ?>"
-                                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                                            onblur="actualizarDetalle(<?= $prod->getIdProducto(); ?>, this.value)">
-                                    </td>
+        $imgBaseUrl = $GLOBALS['VISTA_URL'] . "imagenes/productos/";
+        $imgDir = $_SERVER['DOCUMENT_ROOT'] . "/PWD_TPFinal/Vista/imagenes/productos/";
 
-                                    <td class="text-center">
-                                        <span class="badge fs-6 <?= $prod->getProCantStock() <= 0 ? 'bg-danger' : ($prod->getProCantStock() <= 5 ? 'bg-warning text-dark' : 'bg-success') ?>">
-                                            <?= $prod->getProCantStock(); ?>
-                                        </span>
-                                    </td>
+        $productosPorCat = [];
+        foreach ($productos as $prod) {
+            $nombreCompleto = $prod->getProNombre();
+            $partes = explode('_', $nombreCompleto);
+            $categoria = ucfirst($partes[0] ?? 'sin-categoria');
+            $nombreReal = end($partes);
+            $nombreVisible = str_replace('_', ' ', $nombreReal);
 
-                                    <td class="text-center">
-                                        <button class="btn btn-success btn-sm me-1" onclick="cambiarStock(<?= $prod->getIdProducto(); ?>, 1)" title="+1">
-                                            <i class="fa fa-plus"></i>
-                                        </button>
+            $imagenBD = $prod->getProimagen();
+            $imagenURL = ($imagenBD && file_exists($imgDir . $imagenBD))
+                ? $imgBaseUrl . $imagenBD
+                : $imgBaseUrl . "no-image.jpeg";
 
-                                        <button class="btn btn-danger btn-sm me-2" onclick="cambiarStock(<?= $prod->getIdProducto(); ?>, -1)" title="-1"
-                                            <?= $prod->getProCantStock() <= 0 ? 'disabled' : '' ?>>
-                                            <i class="fa fa-minus"></i>
-                                        </button>
+            $productosPorCat[$categoria][] = [
+                'obj' => $prod,
+                'nombre' => $nombreVisible,
+                'imagen' => $imagenURL
+            ];
+        }
+        ksort($productosPorCat);
+        ?>
 
-                                        <input type="number" min="0" value="<?= $prod->getProCantStock(); ?>"
-                                            class="form-control form-control-sm d-inline-block text-center"
-                                            style="width: 80px;"
-                                            onblur="actualizarStockDirecto(<?= $prod->getIdProducto(); ?>, this.value)">
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php endif; ?>
-        </div>
+        <?php if (empty($productos)): ?>
+            <div class="p-5 text-center">
+                <i class="fa fa-box-open fa-3x text-muted mb-3"></i>
+                <p class="text-muted fs-5">Aún no hay productos creados.</p>
+            </div>
+        <?php else: ?>
+            <div class="accordion accordion-flush" id="accordionProductos">
+                <?php foreach ($productosPorCat as $cat => $items): ?>
+                    <div class="accordion-item border-start border-primary border-4">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed fw-bold text-primary bg-light" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#cat<?= md5($cat) ?>">
+                                <i class="fa fa-folder me-2"></i>
+                                <?= htmlspecialchars($cat) ?> 
+                                <span class="badge bg-primary ms-2"><?= count($items) ?></span>
+                            </button>
+                        </h2>
+
+                        <div id="cat<?= md5($cat) ?>" class="accordion-collapse collapse" data-bs-parent="#accordionProductos">
+                            <div class="accordion-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-primary text-dark">
+                                            <tr>
+                                                <th class="text-center" width="90">Imagen</th>
+                                                <th>Producto</th>
+                                                <th width="120">Precio</th>
+                                                <th width="100">Stock</th>
+                                                <th width="460" class="text-center">Acciones Rápidas</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($items as $item):
+                                                $p = $item['obj'];
+                                                $nombre = $item['nombre'];
+                                                $imagen = $item['imagen'];
+                                                $deshabilitado = $p->getProDeshabilitado() !== null;
+                                            ?>
+                                                <tr class="<?= $deshabilitado ? 'table-secondary' : '' ?>">
+                                                    <td class="text-center">
+                                                        <img src="<?= htmlspecialchars($imagen) ?>"
+                                                             width="70" height="70"
+                                                             class="rounded shadow-sm object-fit-cover border"
+                                                             alt="<?= htmlspecialchars($nombre) ?>"
+                                                             onerror="this.src='<?= $imgBaseUrl ?>no-image.jpeg'">
+                                                    </td>
+                                                    <td>
+                                                        <strong><?= htmlspecialchars($nombre) ?></strong>
+                                                        <?php if ($deshabilitado): ?>
+                                                            <span class="badge bg-danger ms-2">Oculto</span>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td class="fw-bold text-success">
+                                                        $<?= number_format($p->getProPrecio(), 2) ?>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge <?= $p->getProCantStock() <= 5 ? 'bg-danger' : 'bg-success' ?>">
+                                                            <?= $p->getProCantStock() ?>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm d-flex flex-wrap gap-1" role="group">
+
+                                                            <!-- Toggle Visibilidad -->
+                                                            <a href="../producto/accion/accionToggleVisibilidadProducto.php?id=<?= $p->getIdProducto() ?>"
+                                                               class="btn <?= $deshabilitado ? 'btn-outline-success' : 'btn-outline-danger' ?> btn-sm"
+                                                               title="<?= $deshabilitado ? 'Habilitar' : 'Deshabilitar' ?>">
+                                                                <i class="fa <?= $deshabilitado ? 'fa-eye' : 'fa-eye-slash' ?>"></i>
+                                                                <?= $deshabilitado ? 'Mostrar' : 'Ocultar' ?>
+                                                            </a>
+
+                                                            <!-- Cambiar Precio -->
+                                                            <form action="../producto/accion/accionEditarPrecioProducto.php" method="POST" class="d-inline">
+                                                                <input type="hidden" name="idproducto" value="<?= $p->getIdProducto() ?>">
+                                                                <div class="input-group input-group-sm" style="width: 140px;">
+                                                                    <span class="input-group-text">$</span>
+                                                                    <input type="number" step="0.01" name="proprecio" value="<?= $p->getProPrecio() ?>" 
+                                                                           class="form-control form-control-sm" required>
+                                                                    <button type="submit" class="btn btn-primary">OK</button>
+                                                                </div>
+                                                            </form>
+
+                                                            <!-- Cambiar Stock -->
+                                                            <form action="../producto/accion/accionEditarStockProducto.php" method="POST" class="d-inline">
+                                                                <input type="hidden" name="idproducto" value="<?= $p->getIdProducto() ?>">
+                                                                <div class="input-group input-group-sm" style="width: 120px;">
+                                                                    <input type="number" name="procantstock" value="<?= $p->getProCantStock() ?>" 
+                                                                           min="0" class="form-control form-control-sm" required>
+                                                                    <button type="submit" class="btn btn-success">OK</button>
+                                                                </div>
+                                                            </form>
+
+                                                            <!-- Editar Detalle / Oferta / Imagen -->
+                                                            <a href="<?= $GLOBALS['VISTA_URL'] ?>producto/editarProducto.php?id=<?= $p->getIdProducto() ?>"
+                                                               class="btn btn-warning btn-sm" title="Editar todo">
+                                                                <i class="fa fa-edit"></i> Editar
+                                                            </a>
+
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
-<script>
-    // JS: stock + mensajes (igual que antes)
-    function cambiarStock(id, cambio) {
-        fetch(`accion/accionStockAjax.php`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: `id=${id}&cambio=${cambio}`
-        }).then(r => r.json()).then(data => {
-            if (data.success) {
-                const fila = document.querySelector(`tr[data-id="${id}"]`);
-                const badge = fila.querySelector('.badge');
-                const input = fila.querySelector('input[type="number"]');
-                const btnMenos = fila.querySelector('button[title="-1"]');
 
-                badge.textContent = data.nuevoStock;
-                input.value = data.nuevoStock;
-
-                badge.classList.remove('bg-danger', 'bg-warning', 'bg-success', 'text-dark');
-                if (data.nuevoStock <= 0) {
-                    badge.classList.add('bg-danger');
-                    btnMenos.disabled = true;
-                } else if (data.nuevoStock <= 5) {
-                    badge.classList.add('bg-warning', 'text-dark');
-                    btnMenos.disabled = false;
-                } else {
-                    badge.classList.add('bg-success');
-                    btnMenos.disabled = false;
-                }
-                mostrarMensaje('Stock actualizado', 'success');
-            }
-        });
-    }
-
-    function actualizarStockDirecto(id, valor) {
-        const nuevo = parseInt(valor);
-        if (isNaN(nuevo) || nuevo < 0) return;
-        fetch(`accion/accionStockAjax.php`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: `id=${id}&stock=${nuevo}`
-        }).then(r => r.json()).then(data => {
-            if (data.success) {
-                const fila = document.querySelector(`tr[data-id="${id}"]`);
-                const badge = fila.querySelector('.badge');
-                badge.textContent = data.nuevoStock;
-                badge.className = 'badge fs-6 ' + (data.nuevoStock <= 0 ? 'bg-danger' : data.nuevoStock <= 5 ? 'bg-warning text-dark' : 'bg-success');
-                mostrarMensaje('Stock actualizado', 'success');
-            }
-        });
-    }
-
-    function mostrarMensaje(texto, tipo = 'success') {
-        const msg = document.getElementById('mensajeAjax');
-        msg.textContent = texto;
-        msg.className = tipo === 'success' ? 'text-success' : 'text-danger';
-        setTimeout(() => msg.textContent = '', 2000);
-    }
-
-    function actualizarDetalle(id, detalle) {
-        fetch(`accion/accionStockAjax.php`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: `id=${id}&detalle=${encodeURIComponent(detalle)}`
-        }).then(r => r.json()).then(data => {
-            if (data.success) mostrarMensaje('Detalle actualizado', 'success');
-            else mostrarMensaje('Error al actualizar detalle', 'danger');
-        });
-    }
-
-    document.getElementById("tipo").addEventListener("change", function() {
-        document.getElementById("bloquePadre").style.display =
-            (this.value === "sub") ? "block" : "none";
-    });
-</script>
 
 <?php include_once dirname(__DIR__, 1) . '/estructura/pie.php'; ?>

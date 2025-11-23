@@ -190,4 +190,49 @@ class Usuariorol extends BaseDatos
         }
         return $roles;
     }
+
+    /**
+ * Busca registros en la tabla usuariorol según los parámetros dados
+ * Ejemplos de uso:
+ *   buscar(['idusuario' => 5])
+ *   buscar(['idrol' => 1])
+ *   buscar(['idusuario' => 5, 'idrol' => 1])
+ *   buscar() → devuelve todos
+ */
+public function buscar($param = [])
+{
+    $where = " true ";
+    if ($param != null) {
+        if (isset($param['idusuario'])) $where .= " AND idusuario = " . intval($param['idusuario']);
+        if (isset($param['idrol']))     $where .= " AND idrol = " . intval($param['idrol']);
+    }
+
+    $arreglo = array();
+    $sql = "SELECT * FROM usuariorol WHERE " . $where;
+
+    if ($this->Iniciar()) {
+        $res = $this->Ejecutar($sql);
+        if ($res > -1) {
+            if ($res > 0) {
+                while ($row = $this->Registro()) {
+                    $obj = new UsuarioRol();
+
+                    $objUsuario = new Usuario();
+                    $objUsuario->setIdUsuario($row['idusuario']);
+                    $objUsuario->cargar();
+
+                    $objRol = new Rol();
+                    $objRol->setIdRol($row['idrol']);
+                    $objRol->cargar();
+
+                    $obj->setear($objUsuario, $objRol);
+                    $arreglo[] = $obj;
+                }
+            }
+        } else {
+            $this->setMensajeOperacion("UsuarioRol->buscar: " . $this->getError());
+        }
+    }
+    return $arreglo;
+}
 }
