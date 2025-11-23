@@ -233,100 +233,159 @@ class AbmMenu
     }
 
     /**
- * Elimina un menú completo con toda su jerarquía (archivos, roles, hijos, BD)
- */
-public function eliminarMenuCompleto($idMenu)
-{
-    $idMenu = (int)$idMenu;
-    if ($idMenu <= 0) return false;
+     * Elimina un menú completo con toda su jerarquía (archivos, roles, hijos, BD)
+     */
+    public function eliminarMenuCompleto($idMenu)
+    {
+        $idMenu = (int)$idMenu;
+        if ($idMenu <= 0) return false;
 
-    $abmMenuRol       = new AbmMenuRol();
-    $carpetaSecciones = $GLOBALS['VISTA_PATH'] . "secciones/";
+        $abmMenuRol       = new AbmMenuRol();
+        $carpetaSecciones = $GLOBALS['VISTA_PATH'] . "secciones/";
 
-    // === FUNCIÓN RECURSIVA INTERNA (sin problemas de $this ni referencias) ===
-    $eliminarRecursivo = null; // Declaramos antes
-    $eliminarRecursivo = function($id) use (&$eliminarRecursivo, $abmMenuRol, $carpetaSecciones) {
-        $self = $this; // Capturamos $this correctamente
+        // === FUNCIÓN RECURSIVA INTERNA (sin problemas de $this ni referencias) ===
+        $eliminarRecursivo = null; // Declaramos antes
+        $eliminarRecursivo = function ($id) use (&$eliminarRecursivo, $abmMenuRol, $carpetaSecciones) {
+            $self = $this; // Capturamos $this correctamente
 
-        // 1. Eliminar hijos primero
-        $hijos = $self->buscar(['idpadre' => $id]);
-        foreach ($hijos as $hijo) {
-            $eliminarRecursivo($hijo->getIdMenu()); // Ahora sí funciona
-        }
-
-        // 2. Obtener menú actual
-        $menuArr = $self->buscar(['idmenu' => $id]);
-        if (empty($menuArr)) return;
-        $menu = $menuArr[0];
-
-        // 3. Eliminar permisos de roles
-        $roles = $abmMenuRol->buscar(['idmenu' => $id]);
-        foreach ($roles as $rol) {
-            $abmMenuRol->baja([
-                'idmenu' => $id,
-                'idrol'  => $rol->getIdRol() ?? $rol->getIdrol() ?? null
-            ]);
-        }
-
-        // 4. Eliminar archivo físico
-        $ruta = $menu->getMeDescripcion() ?: $menu->getMeLink();
-        if ($ruta) {
-            $archivo = $carpetaSecciones . ltrim($ruta, '/');
-            if (is_file($archivo)) {
-                @unlink($archivo);
+            // 1. Eliminar hijos primero
+            $hijos = $self->buscar(['idpadre' => $id]);
+            foreach ($hijos as $hijo) {
+                $eliminarRecursivo($hijo->getIdMenu()); // Ahora sí funciona
             }
-            // Eliminar carpeta vacía
-            $dir = dirname($archivo);
-            if ($dir !== rtrim($carpetaSecciones, '/\\') && is_dir($dir)) {
-                $contenido = array_diff(scandir($dir), ['.', '..']);
-                if (empty($contenido)) {
-                    @rmdir($dir);
+
+            // 2. Obtener menú actual
+            $menuArr = $self->buscar(['idmenu' => $id]);
+            if (empty($menuArr)) return;
+            $menu = $menuArr[0];
+
+            // 3. Eliminar permisos de roles
+            $roles = $abmMenuRol->buscar(['idmenu' => $id]);
+            foreach ($roles as $rol) {
+                $abmMenuRol->baja([
+                    'idmenu' => $id,
+                    'idrol'  => $rol->getIdRol() ?? $rol->getIdrol() ?? null
+                ]);
+            }
+
+            // 4. Eliminar archivo físico
+            $ruta = $menu->getMeDescripcion() ?: $menu->getMeLink();
+            if ($ruta) {
+                $archivo = $carpetaSecciones . ltrim($ruta, '/');
+                if (is_file($archivo)) {
+                    @unlink($archivo);
+                }
+                // Eliminar carpeta vacía
+                $dir = dirname($archivo);
+                if ($dir !== rtrim($carpetaSecciones, '/\\') && is_dir($dir)) {
+                    $contenido = array_diff(scandir($dir), ['.', '..']);
+                    if (empty($contenido)) {
+                        @rmdir($dir);
+                    }
                 }
             }
-        }
 
-        // 5. Eliminar registro del menú
-        $self->baja(['idmenu' => $id]);
-    };
+            // 5. Eliminar registro del menú
+            $self->baja(['idmenu' => $id]);
+        };
 
-    // Ejecutar
-    $eliminarRecursivo($idMenu);
-    return true;
-}
-public function baja($param) {
-    $exito = false;
-    if (isset($param['idmenu'])) {
-        $menu = new Menu();
-        $menu->setIdMenu($param['idmenu']);
-        if ($menu->cargar()) {
-            $exito = $menu->eliminar();
-        }
+        // Ejecutar
+        $eliminarRecursivo($idMenu);
+        return true;
     }
-    return $exito;
-}
+    public function baja($param)
+    {
+        $exito = false;
+        if (isset($param['idmenu'])) {
+            $menu = new Menu();
+            $menu->setIdMenu($param['idmenu']);
+            if ($menu->cargar()) {
+                $exito = $menu->eliminar();
+            }
+        }
+        return $exito;
+    }
+
+    /**
+     * Devuelve todos los menús que el usuario puede ver según sus roles
+     * @param array $roles Array con nombres de roles (ej: ['admin', 'cliente'])
+     * @return array Lista de objetos Menu
+     */
+    public function obtenerMenuPorRoles($roles)
+    {
+        if (empty($roles)) {
+            return [];
+        }
+
+        // Convertir roles a string para el IN
+        $rolesEscapados = array_map('addslashes', $roles);
+        $rolesIn = "'" . implode("','", $rolesEscapados) . "'";
+
+        // Primero obtenemos los idrol correspondientes
+        $sqlRoles = "SELECT idrol FROM rol WHERE rodescripcion IN ($rolesIn)";
+        $bd = new BaseDatos();
+        $idRoles = [];
+        if ($bd->Ejecutar($sqlRoles) > 0) {
+            while ($row = $bd->Registro()) {
+                $idRoles[] = $row['idrol'];
+            }
+        }
+
+        if (empty($idRoles)) {
+            return [];
+        }
+
+        $idRolesIn = implode(',', $idRoles);
+
+        // Ahora buscamos los menús que tienen al menos uno de esos roles
+        $sql = "SELECT DISTINCT m.*
+            FROM menu m
+            LEFT JOIN menurol mr ON m.idmenu = mr.idmenu
+            WHERE m.medeshabilitado IS NULL
+              AND (mr.idrol IN ($idRolesIn) OR mr.idrol IS NULL)
+            ORDER BY m.idpadre, m.menombre";
+
+        $menus = [];
+        if ($bd->Ejecutar($sql) > 0) {
+            while ($row = $bd->Registro()) {
+                $menu = new Menu();
+                $menu->setear(
+                    $row['idmenu'],
+                    $row['menombre'],
+                    $row['melink'],
+                    $row['medescripcion'],
+                    $row['idpadre'] ? $this->buscar(['idmenu' => $row['idpadre']])[0] ?? null : null,
+                    $row['medeshabilitado']
+                );
+                $menus[] = $menu;
+            }
+        }
+
+        return $menus;
+    }
 
     /* ============================================================
        ===============  GENERAR ARCHIVO PHP COMPLETO ==============
        ============================================================ */
     private function generarContenidoPHP($ruta, $menombre)
-{
-    // Convertimos la ruta web (ej: celulares/samsung.php) en prefijo de BD
-    $rutaSinPhp = str_replace(".php", "", $ruta);
-    $partesRuta = explode("/", $rutaSinPhp);
-    
-    // Construimos el prefijo exacto como aparece en proNombre
-    // Ej: celulares → celulares_
-    // Ej: celulares/samsung → celulares_samsung_
-    $prefijoBD = "";
-    foreach ($partesRuta as $i => $parte) {
-        $prefijoBD .= $parte;
-        if ($i < count($partesRuta) - 1) {
-            $prefijoBD .= "_";  // solo guion bajo entre niveles
-        }
-    }
-    $prefijoBD = strtolower($prefijoBD) . "_";
+    {
+        // Convertimos la ruta web (ej: celulares/samsung.php) en prefijo de BD
+        $rutaSinPhp = str_replace(".php", "", $ruta);
+        $partesRuta = explode("/", $rutaSinPhp);
 
-    return <<<PHP
+        // Construimos el prefijo exacto como aparece en proNombre
+        // Ej: celulares → celulares_
+        // Ej: celulares/samsung → celulares_samsung_
+        $prefijoBD = "";
+        foreach ($partesRuta as $i => $parte) {
+            $prefijoBD .= $parte;
+            if ($i < count($partesRuta) - 1) {
+                $prefijoBD .= "_";  // solo guion bajo entre niveles
+            }
+        }
+        $prefijoBD = strtolower($prefijoBD) . "_";
+
+        return <<<PHP
 <?php
 require_once \$_SERVER['DOCUMENT_ROOT'] . "/PWD_TPFinal/configuracion.php";
 include_once \$GLOBALS['VISTA_PATH'] . "estructura/cabecera.php";

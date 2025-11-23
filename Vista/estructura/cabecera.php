@@ -96,6 +96,49 @@ foreach ($menus as $m) {
                      <a class="nav-link" href="<?= $GLOBALS['VISTA_URL']; ?>contacto/contacto.php">Contacto</a>
                   </li>
 
+                  <!-- MIS COMPRAS (solo para clientes logueados) -->
+                  <?php if ($usuario && $session->tieneRol('cliente')): ?>
+                     <?php
+                     $abmCompra = new AbmCompra();
+                     $abmEstado = new AbmCompraEstado();
+                     $comprasUsuario = $abmCompra->buscar(['idusuario' => $usuario->getIdUsuario()]);
+                     ?>
+                     <?php if (!empty($comprasUsuario)): ?>
+                        <div class="mt-4 border-top pt-3">
+                           <h6 class="fw-bold text-primary">
+                              <i class="fa fa-shopping-bag me-2"></i> Mis Compras
+                           </h6>
+                           <div class="list-group list-group-flush">
+                              <?php foreach ($comprasUsuario as $compra):
+                                 $estadoObj = $abmEstado->obtenerEstadoActual($compra->getIdCompra());
+                                 $estadoTexto = $estadoObj ? $estadoObj->getObjCompraEstadoTipo()->getCeTDescripcion() : 'desconocido';
+                                 $estadoClase = match ($estadoTexto) {
+                                    'iniciada' => 'bg-warning text-dark',
+                                    'aceptada' => 'bg-info',
+                                    'enviada'  => 'bg-success',
+                                    'cancelada' => 'bg-danger',
+                                    default    => 'bg-secondary'
+                                 };
+                              ?>
+                                 <a href="<?= $GLOBALS['VISTA_URL'] ?>compra/verCompraCliente.php?id=<?= $compra->getIdCompra() ?>"
+                                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2">
+                                    <div>
+                                       <small class="text-muted">Compra #<?= $compra->getIdCompra() ?></small><br>
+                                       <strong><?= ucfirst($estadoTexto) ?></strong>
+                                    </div>
+                                    <span class="badge <?= $estadoClase ?> rounded-pill">
+                                       <?= $estadoTexto == 'iniciada' ? 'Carrito' : '' ?>
+                                       <?= $estadoTexto == 'aceptada' ? 'Procesando' : '' ?>
+                                       <?= $estadoTexto == 'enviada' ? 'En camino' : '' ?>
+                                       <?= $estadoTexto == 'cancelada' ? 'Cancelada' : '' ?>
+                                    </span>
+                                 </a>
+                              <?php endforeach; ?>
+                           </div>
+                        </div>
+                     <?php endif; ?>
+                  <?php endif; ?>
+
                   <!-- ADMIN -->
                   <?php if ($usuario && in_array("admin", $rolesUsuario)): ?>
                      <li class="nav-item">
@@ -138,34 +181,35 @@ foreach ($menus as $m) {
    </header>
 
 
-<!-- MENÚ LATERAL -->
-<div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu">
-    <div class="offcanvas-header">
-        <h5 class="fw-bold">
+   <!-- MENÚ LATERAL -->
+   <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu">
+      <div class="offcanvas-header">
+         <h5 class="fw-bold">
             <i class="fa fa-bars me-2"></i> Categorías
-        </h5>
-        <button class="btn-close" data-bs-dismiss="offcanvas"></button>
-    </div>
+         </h5>
+         <button class="btn-close" data-bs-dismiss="offcanvas"></button>
+      </div>
 
-    <div class="offcanvas-body">
+      <div class="offcanvas-body">
 
-        <?php if (!empty($menusPadre)): ?>
+         <?php if (!empty($menusPadre)): ?>
 
             <?php
             /* -----------------------------------------------------
                🔁 Función RECURSIVA — puro Bootstrap collapse
             ----------------------------------------------------- */
-            function menuBootstrap($menu, $hijos, $nivel = 0) {
+            function menuBootstrap($menu, $hijos, $nivel = 0)
+            {
 
-                $id = $menu->getIdMenu();
-                $hasChildren = !empty($hijos[$id]);
-                $padding = $nivel * 2; // p-2, p-4, p-6...
+               $id = $menu->getIdMenu();
+               $hasChildren = !empty($hijos[$id]);
+               $padding = $nivel * 2; // p-2, p-4, p-6...
 
-                echo "<div class='mb-1 ps-$padding'>";
+               echo "<div class='mb-1 ps-$padding'>";
 
-                /* ---------- ENCABEZADO DE LA CATEGORÍA ---------- */
-                if ($hasChildren) {
-                    echo "
+               /* ---------- ENCABEZADO DE LA CATEGORÍA ---------- */
+               if ($hasChildren) {
+                  echo "
                         <a class='d-flex justify-content-between align-items-center text-dark text-decoration-none'
                            data-bs-toggle='collapse'
                            href='#collapse-$id'
@@ -178,17 +222,17 @@ foreach ($menus as $m) {
                             <i class='fa fa-chevron-down'></i>
                         </a>
                     ";
-                } else {
-                    echo "
+               } else {
+                  echo "
                         <span class='d-flex align-items-center'>
                             <i class='fa fa-folder me-2 text-secondary'></i>
                             " . htmlspecialchars($menu->getMeNombre()) . "
                         </span>
                     ";
-                }
+               }
 
-                /* ---------- ENLACE VER TODO ---------- */
-                echo "
+               /* ---------- ENLACE VER TODO ---------- */
+               echo "
                     <div class='ms-4'>
                         <a href='{$GLOBALS['VISTA_URL']}secciones/{$menu->getMeLink()}'
                            class='small text-primary text-decoration-none'>
@@ -197,34 +241,34 @@ foreach ($menus as $m) {
                     </div>
                 ";
 
-                /* ---------- HIJOS ---------- */
-                if ($hasChildren) {
-                    echo "<div class='collapse mt-1' id='collapse-$id'>";
+               /* ---------- HIJOS ---------- */
+               if ($hasChildren) {
+                  echo "<div class='collapse mt-1' id='collapse-$id'>";
 
-                    foreach ($hijos[$id] as $hijo) {
-                        menuBootstrap($hijo, $hijos, $nivel + 1);
-                    }
+                  foreach ($hijos[$id] as $hijo) {
+                     menuBootstrap($hijo, $hijos, $nivel + 1);
+                  }
 
-                    echo "</div>";
-                }
+                  echo "</div>";
+               }
 
-                echo "</div>";
+               echo "</div>";
             }
             ?>
 
             <!-- Contenedor general -->
             <div>
-                <?php foreach ($menusPadre as $padre): ?>
-                    <?php menuBootstrap($padre, $menusHijos); ?>
-                <?php endforeach; ?>
+               <?php foreach ($menusPadre as $padre): ?>
+                  <?php menuBootstrap($padre, $menusHijos); ?>
+               <?php endforeach; ?>
             </div>
 
-        <?php else: ?>
+         <?php else: ?>
             <p class="text-muted">No hay secciones aún.</p>
-        <?php endif; ?>
+         <?php endif; ?>
 
-    </div>
-</div>
+      </div>
+   </div>
 
 
 
