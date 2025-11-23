@@ -20,7 +20,11 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `bdcarritocompras`
 --
+-- 1. Create the database if it doesn't exist
+CREATE DATABASE IF NOT EXISTS `bdcarritocompras` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- 2. Select the database for execution
+USE `bdcarritocompras`;
 -- --------------------------------------------------------
 
 --
