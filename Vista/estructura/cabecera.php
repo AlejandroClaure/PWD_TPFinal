@@ -96,48 +96,16 @@ foreach ($menus as $m) {
                      <a class="nav-link" href="<?= $GLOBALS['VISTA_URL']; ?>contacto/contacto.php">Contacto</a>
                   </li>
 
-                  <!-- MIS COMPRAS (solo para clientes logueados) -->
+                  <!-- MIS COMPRAS -->
                   <?php if ($usuario && $session->tieneRol('cliente')): ?>
-                     <?php
-                     $abmCompra = new AbmCompra();
-                     $abmEstado = new AbmCompraEstado();
-                     $comprasUsuario = $abmCompra->buscar(['idusuario' => $usuario->getIdUsuario()]);
-                     ?>
-                     <?php if (!empty($comprasUsuario)): ?>
-                        <div class="mt-4 border-top pt-3">
-                           <h6 class="fw-bold text-primary">
-                              <i class="fa fa-shopping-bag me-2"></i> Mis Compras
-                           </h6>
-                           <div class="list-group list-group-flush">
-                              <?php foreach ($comprasUsuario as $compra):
-                                 $estadoObj = $abmEstado->obtenerEstadoActual($compra->getIdCompra());
-                                 $estadoTexto = $estadoObj ? $estadoObj->getObjCompraEstadoTipo()->getCeTDescripcion() : 'desconocido';
-                                 $estadoClase = match ($estadoTexto) {
-                                    'iniciada' => 'bg-warning text-dark',
-                                    'aceptada' => 'bg-info',
-                                    'enviada'  => 'bg-success',
-                                    'cancelada' => 'bg-danger',
-                                    default    => 'bg-secondary'
-                                 };
-                              ?>
-                                 <a href="<?= $GLOBALS['VISTA_URL'] ?>compra/verCompraCliente.php?id=<?= $compra->getIdCompra() ?>"
-                                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2">
-                                    <div>
-                                       <small class="text-muted">Compra #<?= $compra->getIdCompra() ?></small><br>
-                                       <strong><?= ucfirst($estadoTexto) ?></strong>
-                                    </div>
-                                    <span class="badge <?= $estadoClase ?> rounded-pill">
-                                       <?= $estadoTexto == 'iniciada' ? 'Carrito' : '' ?>
-                                       <?= $estadoTexto == 'aceptada' ? 'Procesando' : '' ?>
-                                       <?= $estadoTexto == 'enviada' ? 'En camino' : '' ?>
-                                       <?= $estadoTexto == 'cancelada' ? 'Cancelada' : '' ?>
-                                    </span>
-                                 </a>
-                              <?php endforeach; ?>
-                           </div>
-                        </div>
-                     <?php endif; ?>
+                     <li class="nav-item">
+                        <a class="nav-link" href="<?= $GLOBALS['VISTA_URL']; ?>compra/verCompraCliente.php">
+                           <i class="fa fa-shopping-bag"></i> Mis Compras
+                        </a>
+                     </li>
                   <?php endif; ?>
+
+
 
                   <!-- ADMIN -->
                   <?php if ($usuario && in_array("admin", $rolesUsuario)): ?>

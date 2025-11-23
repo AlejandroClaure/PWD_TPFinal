@@ -29,8 +29,9 @@ foreach ($carrito as $item) {
 $envio = $subtotal > 30000 ? 0 : ($subtotal > 0 ? 5000 : 0); // envío gratis si supera $30.000 (opcional)
 $total = $subtotal + $envio;
 
-$imgDir = $GLOBALS['ROOT_PATH'] . "vista/imagenes/productos/"; // ajusta si tu estructura es distinta
-$imgBaseUrl = $GLOBALS['VISTA_URL'] . "imagenes/productos/";
+$imgDir = $GLOBALS['VISTA_PATH'] . "imagenes/productos/";
+$imgBaseUrl = $GLOBALS['IMG_URL'] . "productos/";
+
 
 include_once '../estructura/cabecera.php';
 ?>

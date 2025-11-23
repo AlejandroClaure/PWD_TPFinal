@@ -58,33 +58,54 @@ class AbmCompraItem
     // --------------------------------------------------
     // Obtener compra iniciada del usuario (si no existe crea)
     // --------------------------------------------------
-    private function getCompraIniciada($usuarioId)
-    {
-        $abmCompra = new AbmCompra();
-        $compras = $abmCompra->buscar(['idusuario' => $usuarioId]);
+   private function getCompraIniciada($usuarioId)
+{
+    // Buscar compras que estén en estado INICIADA
+    $sql = "
+        idcompra IN (
+            SELECT idcompra 
+            FROM compraestado 
+            WHERE idcompraestadotipo = " . COMPRA_ESTADO_INICIADA . "
+        )
+        AND idusuario = " . intval($usuarioId);
 
-        foreach ($compras as $c) {
-            // buscar estados de esta compra
-            $abmEstado = new AbmCompraEstado();
-            $estados = $abmEstado->buscar(['idcompra' => $c->getIdCompra()]);
-            foreach ($estados as $e) {
-                if ($e->getObjCompraEstadoTipo()->getIdCompraEstadoTipo() == COMPRA_ESTADO_INICIADA) {
-                    return $c;
-                }
-            }
-        }
+    // Llamada correcta (no estática)
+    $objCompra = new Compra();
+    $compras = $objCompra->listar($sql);
 
-        // si no existe, crear compra y estado inicial
-        $nuevaCompraId = $abmCompra->alta(['cofecha' => date('Y-m-d H:i:s'), 'idusuario' => $usuarioId]);
-        $c = new Compra();
-        $c->setIdCompra($nuevaCompraId);
-        $c->cargar();
-
-        $abmEstado = new AbmCompraEstado();
-        $abmEstado->alta(['idcompra' => $c->getIdCompra(), 'idcompraestadotipo' => COMPRA_ESTADO_INICIADA]);
-
-        return $c;
+    // Si existe, retornarla
+    if (!empty($compras)) {
+        return $compras[0];
     }
+
+    // Si no existe, crear nueva compra
+    $abmCompra = new AbmCompra();
+
+    $nuevaCompraObj = $abmCompra->alta([
+        "cofecha" => date("Y-m-d H:i:s"),
+        "idusuario" => $usuarioId
+    ]);
+
+    if (!$nuevaCompraObj) {
+        return null; // por seguridad
+    }
+
+    // Cargar objeto compra recién creada
+    $compra = new Compra();
+    $compra->setIdCompra($nuevaCompraObj->getIdCompra());
+    $compra->cargar();
+
+    // Crear estado INICIADA
+    $abmEstado = new AbmCompraEstado();
+    $abmEstado->alta([
+        "idcompra" => $compra->getIdCompra(),
+        "idcompraestadotipo" => COMPRA_ESTADO_INICIADA
+    ]);
+
+    return $compra;
+}
+
+
 
     // --------------------------------------------------
     // Añadir producto al carrito del usuario (NO TOCA STOCK)
@@ -211,23 +232,22 @@ class AbmCompraItem
     }
 
     /**
-     * Vacía completamente el carrito del usuario
-     */
-    public function vaciarCarrito($usuarioId)
-    {
-        $compra = $this->getCompraIniciada($usuarioId);
-        $items = $this->buscar(['idcompra' => $compra->getIdCompra()]);
-
-        $eliminados = 0;
-        foreach ($items as $item) {
-            if ($this->baja(['idcompraitem' => $item->getIdCompraItem()])) {
-                $eliminados++;
-            }
+ * Vacía completamente el carrito del usuario
+ */
+public function vaciarCarrito($usuarioId) {
+    $compra = $this->getCompraIniciada($usuarioId);
+    $items = $this->buscar(['idcompra' => $compra->getIdCompra()]);
+    
+    $eliminados = 0;
+    foreach ($items as $item) {
+        if ($this->baja(['idcompraitem' => $item->getIdCompraItem()])) {
+            $eliminados++;
         }
-
-        // Actualizar sesión
-        $this->cargarCarritoSesion($usuarioId);
-
-        return $eliminados;
     }
+    
+    // Actualizar sesión
+    $this->cargarCarritoSesion($usuarioId);
+    
+    return $eliminados;
+}
 }
