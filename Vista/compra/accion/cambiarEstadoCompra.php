@@ -16,5 +16,5 @@ if ($idCompra > 0 && in_array($nuevoEstado, [2,3,4])) {
     $abm->cambiarEstadoCompra($idCompra, $nuevoEstado);
 }
 
-header("Location: ../verCompra.php?id=" . $idCompra);
+header("Location: ../verCompraAdmin.php?id=" . $idCompra);
 exit;

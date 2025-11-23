@@ -61,7 +61,7 @@ include_once '../estructura/cabecera.php';
                         </td>
                         <td>$<?= number_format($total, 0, ',', '.') ?></td>
                         <td>
-                            <a href="verCompra.php?id=<?= $compra->getIdCompra() ?>" class="btn btn-sm btn-info">
+                            <a href="verCompraAdmin.php?id=<?= $compra->getIdCompra() ?>" class="btn btn-sm btn-info">
                                 Ver detalle
                             </a>
                         </td>

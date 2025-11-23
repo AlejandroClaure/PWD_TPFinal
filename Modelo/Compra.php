@@ -6,6 +6,7 @@ class Compra extends BaseDatos
     private $cofecha;
     private $idusuario;
     private $mensajeoperacion;
+    private $objUsuario;
 
     public function __construct()
     {
@@ -13,6 +14,7 @@ class Compra extends BaseDatos
         $this->idcompra = 0;
         $this->cofecha = "";
         $this->idusuario = 0;
+        $this->objUsuario = new Usuario(); // inicializamos
         $this->mensajeoperacion = "";
     }
 
@@ -21,6 +23,12 @@ class Compra extends BaseDatos
         $this->setIdCompra($id);
         $this->setCoFecha($fecha);
         $this->setIdUsuario($idusuario);
+
+        // cargamos el objeto Usuario automáticamente
+        $usuario = new Usuario();
+        $usuario->setIdUsuario($idusuario);
+        $usuario->cargar(); // suponiendo que tu clase Usuario tiene cargar()
+        $this->setObjUsuario($usuario);
     }
 
 
@@ -58,6 +66,14 @@ class Compra extends BaseDatos
     public function setMensajeOperacion($valor)
     {
         $this->mensajeoperacion = $valor;
+    }
+    public function getObjUsuario()
+    {
+        return $this->objUsuario;
+    }
+    public function setObjUsuario($usuario)
+    {
+        $this->objUsuario = $usuario;
     }
 
 
