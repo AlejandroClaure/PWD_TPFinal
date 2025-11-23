@@ -172,7 +172,7 @@ include_once dirname(__DIR__, 1) . '/estructura/cabecera.php';
                                         <?= $p->getMeDeshabilitado() ? "🚫" : "👁️" ?>
                                     </a>
                                     <a href="<?= $GLOBALS['VISTA_URL']; ?>menus/editarMenu.php?idmenu=<?= $p->getIdMenu(); ?>" class="btn btn-sm btn-outline-warning">Editar</a>
-                                    <a href="accion/accionEliminarMenu.php?idmenu=<?= $p->getIdMenu(); ?>" class="btn btn-sm btn-outline-danger"
+                                    <a href="accion/accionEliminarMenus.php?idmenu=<?= $p->getIdMenu(); ?>" class="btn btn-sm btn-outline-danger"
                                         onclick="return confirm('Eliminar sección y archivos asociados de forma permanente? Esta acción no se puede deshacer.');">
                                         Eliminar
                                     </a>
@@ -191,7 +191,7 @@ include_once dirname(__DIR__, 1) . '/estructura/cabecera.php';
                                                     <?= $h->getMeDeshabilitado() ? "🚫" : "👁️" ?>
                                                 </a>
                                                 <a href="<?= $GLOBALS['VISTA_URL']; ?>menus/editarMenu.php?idmenu=<?= $h->getIdMenu(); ?>" class="btn btn-sm btn-outline-warning">Editar</a>
-                                                <a href="accion/accionEliminarMenu.php?idmenu=<?= $h->getIdMenu(); ?>" class="btn btn-sm btn-outline-danger"
+                                                <a href="accion/accionEliminarMenus.php?idmenu=<?= $h->getIdMenu(); ?>" class="btn btn-sm btn-outline-danger"
                                                     onclick="return confirm('Eliminar sub-sección y archivos asociados de forma permanente? Esta acción no se puede deshacer.');">
                                                     Eliminar
                                                 </a>
