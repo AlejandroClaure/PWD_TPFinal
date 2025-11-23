@@ -1,5 +1,6 @@
 <?php
-class BaseDatos extends PDO {
+class BaseDatos extends PDO
+{
 
     private $engine;
     private $host;
@@ -13,12 +14,13 @@ class BaseDatos extends PDO {
     private $error;
     private $sql;
 
-    public function __construct() {
+    public function __construct()
+    {
 
         // CONFIGURACIÓN CORRECTA PARA TU PROYECTO
         $this->engine   = 'mysql';
         $this->host     = 'localhost';
-        $this->database = 'bdcarritocompras';  
+        $this->database = 'bdcarritocompras';
         $this->user     = 'root';
         $this->pass     = '';
         $this->debug    = true;
@@ -37,7 +39,6 @@ class BaseDatos extends PDO {
             ]);
 
             $this->conec = true;
-
         } catch (PDOException $e) {
             $this->error = $e->getMessage();
             $this->conec = false;
@@ -48,39 +49,48 @@ class BaseDatos extends PDO {
         }
     }
 
-    public function Iniciar() {
+    public function Iniciar()
+    {
         return $this->conec;
     }
 
-    public function getConec() {
+    public function getConec()
+    {
         return $this->conec;
     }
 
-    public function setDebug($debug) {
+    public function setDebug($debug)
+    {
         $this->debug = $debug;
     }
 
-    public function getDebug() {
+    public function getDebug()
+    {
         return $this->debug;
     }
 
-    public function setError($e) {
+    public function setError($e)
+    {
         $this->error = $e;
     }
 
-    public function getError() {
+    public function getError()
+    {
         return $this->error;
     }
 
-    public function setSQL($sql) {
+    public function setSQL($sql)
+    {
         $this->sql = $sql;
     }
 
-    public function getSQL() {
+    public function getSQL()
+    {
         return $this->sql;
     }
 
-    public function Ejecutar($sql) {
+    public function Ejecutar($sql)
+    {
         $this->setError("");
         $this->setSQL($sql);
 
@@ -91,17 +101,20 @@ class BaseDatos extends PDO {
         return -1;
     }
 
-    private function EjecutarInsert($sql) {
+    private function EjecutarInsert($sql)
+    {
         try {
-            $res = parent::exec($sql);
-            return $this->lastInsertId();
+            parent::exec($sql);  
+            return parent::lastInsertId(); 
         } catch (PDOException $e) {
             $this->setError($e->getMessage());
             return -1;
         }
     }
 
-    private function EjecutarDeleteUpdate($sql) {
+
+    private function EjecutarDeleteUpdate($sql)
+    {
         try {
             return parent::exec($sql);
         } catch (PDOException $e) {
@@ -110,7 +123,8 @@ class BaseDatos extends PDO {
         }
     }
 
-    private function EjecutarSelect($sql) {
+    private function EjecutarSelect($sql)
+    {
         try {
             $stmt = parent::query($sql);
             $rows = $stmt->fetchAll();
@@ -119,32 +133,30 @@ class BaseDatos extends PDO {
             $this->indice = 0;
 
             return count($rows);
-
         } catch (PDOException $e) {
             $this->setError($e->getMessage());
             return -1;
         }
     }
 
-    public function Registro() {
+    public function Registro()
+    {
         if ($this->indice < count($this->resultado)) {
             return $this->resultado[$this->indice++];
         }
         return false;
     }
-    public function ultimoId() {
-    $id = null;
+    public function ultimoId()
+    {
+        $id = null;
 
-    $sql = "SELECT LAST_INSERT_ID() as id";
-    if ($this->Ejecutar($sql) > 0) {
-        if ($row = $this->Registro()) {
-            $id = $row["id"];
+        $sql = "SELECT LAST_INSERT_ID() as id";
+        if ($this->Ejecutar($sql) > 0) {
+            if ($row = $this->Registro()) {
+                $id = $row["id"];
+            }
         }
+
+        return $id;
     }
-
-    return $id;
-}
-
-
-
 }

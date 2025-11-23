@@ -6,13 +6,13 @@ class AbmCompra
     public function alta($datos)
     {
         $obj = new Compra();
-        $obj->setear(
-            0,
-            $datos["cofecha"],
-            $datos["idusuario"]
-        );
-        return $obj->insertar();
+        $obj->setear(0, $datos["cofecha"], $datos["idusuario"]);
+        if ($obj->insertar()) {
+            return $obj; // DEVOLVEMOS EL OBJETO CON ID
+        }
+        return false;
     }
+
 
     public function baja($datos)
     {

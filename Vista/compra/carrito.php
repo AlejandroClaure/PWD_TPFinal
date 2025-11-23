@@ -1,7 +1,7 @@
 <?php
 include_once '../../configuracion.php';
 include_once $GLOBALS['CONTROL_PATH'] . 'Session.php';
-include_once $GLOBALS['CONTROL_PATH'] . 'AbmProducto.php';
+include_once $GLOBALS['CONTROL_PATH'] . 'AbmCompraItem.php';
 
 session_start();
 
@@ -11,222 +11,168 @@ if (!$session->activa()) {
     exit;
 }
 
-// ===============================
-// CARRITO EN SESIÓN
-// ===============================
-if (!isset($_SESSION['carrito'])) {
-    $_SESSION['carrito'] = [];
-}
-$carrito =& $_SESSION['carrito'];
+$usuario = $session->getUsuario();
+$usuarioId = $usuario->getIdUsuario();
 
+// Cargar carrito desde BD
+$abmItem = new AbmCompraItem();
+list($compra, $carrito) = $abmItem->obtenerCompraYCarrito($usuarioId);
 
-// ===============================
-// DETECCIÓN DE IMÁGENES
-// ===============================
-$imgDir = $GLOBALS['VISTA_PATH'] . "imagenes/productos/";
-$imgBaseUrl = $GLOBALS['VISTA_URL'] . "imagenes/productos/";
+// Guardar en sesión (útil para otras vistas rápidas)
+$_SESSION['carrito'] = $carrito;
 
-if (!is_dir($imgDir)) {
-    mkdir($imgDir, 0777, true);
-}
-
-
-// ===============================
-// FUNCIONES
-// ===============================
-function normalizar_nombre_img($nombre) {
-    $tmp = trim($nombre);
-    $tmp = mb_strtolower($tmp, 'UTF-8');
-    $tmp = iconv('UTF-8', 'ASCII//TRANSLIT', $tmp) ?: $tmp;
-    $tmp = preg_replace('/[^a-z0-9 ]+/', '', $tmp);
-    $tmp = preg_replace('/\s+/', '_', trim($tmp));
-    return $tmp;
-}
-
-
-// ===============================
-// MODIFICAR CANTIDAD
-// ===============================
-if (isset($_GET['id']) && isset($_GET['accion'])) {
-
-    $idProducto = intval($_GET['id']);
-    $accion = $_GET['accion'];
-
-    $abmProducto = new AbmProducto();
-    $producto = $abmProducto->buscarPorId($idProducto);
-
-    if (!$producto) {
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit;
-    }
-
-    $precio = floatval($producto->getProPrecio());
-    $stock  = intval($producto->getProCantStock());
-
-    // Nombre real sin las categorías
-    $nombreBD = $producto->getProNombre();
-    $partes = explode("_", $nombreBD);
-    $nombreReal = array_pop($partes);
-
-    // Guardar detalle e imagen
-    $detalle = $producto->getProDetalle();
-    $imagenNombre = $producto->getProImagen();
-
-    if ($accion === 'sumar') {
-
-        if (!isset($carrito[$idProducto])) {
-            $carrito[$idProducto] = [
-                'nombre'   => $nombreReal,
-                'precio'   => $precio,
-                'cantidad' => 0,
-                'detalle'  => $detalle,
-                'imagen'   => $imagenNombre
-            ];
-        }
-
-        if ($carrito[$idProducto]['cantidad'] < $stock) {
-            $carrito[$idProducto]['cantidad']++;
-        }
-
-    } elseif ($accion === 'restar') {
-
-        if (isset($carrito[$idProducto])) {
-            $carrito[$idProducto]['cantidad']--;
-
-            if ($carrito[$idProducto]['cantidad'] <= 0) {
-                unset($carrito[$idProducto]);
-            }
-        }
-    }
-
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
-}
-
-
-// ===============================
-// ELIMINAR PRODUCTO
-// ===============================
-if (isset($_GET['eliminar'])) {
-    $idEliminar = intval($_GET['eliminar']);
-
-    if (isset($carrito[$idEliminar])) {
-        unset($carrito[$idEliminar]);
-    }
-
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
-}
-
-
-// ===============================
-// TOTALES
-// ===============================
+// Calcular totales
 $subtotal = 0;
-
 foreach ($carrito as $item) {
-    $subtotal += floatval($item['precio']) * intval($item['cantidad']);
+    $subtotal += $item['precio'] * $item['cantidad'];
 }
-
-$envio = $subtotal > 0 ? 5000 : 0;
+$envio = $subtotal > 30000 ? 0 : ($subtotal > 0 ? 5000 : 0); // envío gratis si supera $30.000 (opcional)
 $total = $subtotal + $envio;
 
-?>
+$imgDir = $GLOBALS['ROOT_PATH'] . "vista/imagenes/productos/"; // ajusta si tu estructura es distinta
+$imgBaseUrl = $GLOBALS['VISTA_URL'] . "imagenes/productos/";
 
-<?php include_once '../estructura/cabecera.php'; ?>
+include_once '../estructura/cabecera.php';
+?>
 
 <main class="mt-5 pt-5">
 <div class="container mt-5">
-    <h3>Mi carrito</h3>
+    <h2 class="mb-4">
+        <i class="bi bi-cart3"></i> Mi Carrito 
+        <?php if (!empty($carrito)): ?>
+            <span class="badge bg-primary"><?= count($carrito) ?> producto<?= count($carrito)>1?'s':'' ?></span>
+        <?php endif; ?>
+    </h2>
 
     <?php if (empty($carrito)): ?>
-        <p class="text-muted">No hay productos en el carrito.</p>
+        <!----------------------------------- CARRITO VACÍO ----------------------------------->
+        <div class="text-center py-5">
+            <i class="bi bi-cart-x display-1 text-muted"></i>
+            <p class="lead mt-3">Tu carrito está vacío</p>
+            <a href="../producto/producto.php" class="btn btn-primary btn-lg">Ir a Comprar</a>
+        </div>
 
     <?php else: ?>
-
+        <!----------------------------------- CARRITO CON PRODUCTOS ----------------------------------->
         <div class="table-responsive">
-            <table class="table align-middle">
-                <thead>
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
                     <tr>
                         <th>Producto</th>
-                        <th>Precio Unitario</th>
-                        <th>Cantidad</th>
-                        <th>Subtotal</th>
-                        <th>Acción</th>
+                        <th class="text-center">Precio</th>
+                        <th class="text-center">Cantidad</th>
+                        <th class="text-end">Subtotal</th>
+                        <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-
-                <?php foreach ($carrito as $id => $item):
-
-                    $nombre = htmlspecialchars(str_replace("_", " ", $item['nombre']));
-                    $precio = floatval($item['precio']);
-                    $cantidad = intval($item['cantidad']);
-
-                    // Imagen
-                    if ($item['imagen'] && file_exists($imgDir . $item['imagen'])) {
-                        $imagenURL = $imgBaseUrl . $item['imagen'];
-                    } else {
-                        $imagenURL = $imgBaseUrl . "no-image.jpeg";
-                    }
-
-                    // Stock actual
-                    $abmProducto = new AbmProducto();
-                    $productoObj = $abmProducto->buscarPorId($id);
-                    $stock = intval($productoObj->getProCantStock());
-
-                ?>
+                    <?php foreach ($carrito as $id => $item): 
+                        $imagenURL = (!empty($item['imagen']) && file_exists($imgDir . $item['imagen']))
+                            ? $imgBaseUrl . $item['imagen']
+                            : $imgBaseUrl . "no-image.jpeg";
+                        $puedeSumar = $item['cantidad'] < $item['stock'];
+                    ?>
                     <tr>
+                        <!-- Producto -->
                         <td class="d-flex align-items-center">
-                            <img src="<?= $imagenURL ?>" 
-                                 alt="<?= $nombre ?>" 
-                                 style="width:50px; height:auto; margin-right:10px;">
-                            <?= $nombre ?>
-                        </td>
-
-                        <td>$<?= number_format($precio, 2, ',', '.') ?></td>
-
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <a href="?id=<?= $id ?>&accion=restar" class="btn btn-sm btn-secondary me-1">-</a>
-
-                                <?= $cantidad ?>
-
-                                <a href="?id=<?= $id ?>&accion=sumar"
-                                   class="btn btn-sm btn-secondary ms-1 <?= $cantidad >= $stock ? 'disabled' : '' ?>">
-                                   +
-                                </a>
+                            <img src="<?= $imagenURL ?>" alt="<?= htmlspecialchars($item['nombre']) ?>" 
+                                 class="me-3 rounded" style="width:70px; height:70px; object-fit:cover;">
+                            <div>
+                                <strong><?= htmlspecialchars($item['nombre']) ?></strong><br>
+                                <small class="text-muted"><?= htmlspecialchars($item['detalle']) ?></small>
                             </div>
-                            <small class="text-muted">Stock: <?= $stock ?></small>
                         </td>
 
-                        <td>$<?= number_format($precio * $cantidad, 2, ',', '.') ?></td>
+                        <!-- Precio unitario -->
+                        <td class="text-center">
+                            $<?= number_format($item['precio'], 0, ',', '.') ?>
+                        </td>
 
-                        <td>
-                            <a href="?eliminar=<?= $id ?>" class="btn btn-danger btn-sm">Eliminar</a>
+                        <!-- Cantidad + controles -->
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
+                                <a href="accion/accionRestarStockCarrito.php?id=<?= $id ?>"
+                                   class="btn btn-outline-secondary btn-sm">–</a>
+                                
+                                <span class="btn btn-light btn-sm fw-bold"><?= $item['cantidad'] ?></span>
+                                
+                                <a href="accion/accionSumarStockCarrito.php?id=<?= $id ?>"
+                                   class="btn btn-outline-secondary btn-sm <?= !$puedeSumar ? 'disabled' : '' ?>"
+                                   title="<?= !$puedeSumar ? 'Sin stock disponible' : 'Sumar uno' ?>">+</a>
+                            </div>
+                            <div class="text-muted small mt-1">
+                                Stock: <?= $item['stock'] ?>
+                                <?= !$puedeSumar ? ' <span class="text-danger">(máximo)</span>' : '' ?>
+                            </div>
+                        </td>
+
+                        <!-- Subtotal -->
+                        <td class="text-end fw-bold">
+                            $<?= number_format($item['precio'] * $item['cantidad'], 0, ',', '.') ?>
+                        </td>
+
+                        <!-- Eliminar -->
+                        <td class="text-center">
+                            <a href="accion/accionEliminarItemCarrito.php?id=<?= $id ?>"
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('¿Eliminar este producto del carrito?')">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </a>
                         </td>
                     </tr>
-
-                <?php endforeach; ?>
-
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
 
+        <!----------------------------------- RESUMEN DE COMPRA ----------------------------------->
+        <div class="card mt-4">
+            <div class="card-body">
+                <div class="row justify-content-end">
+                    <div class="col-md-5">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td>Subtotal</td>
+                                <td class="text-end">$<?= number_format($subtotal, 0, ',', '.') ?></td>
+                            </tr>
+                            <tr>
+                                <td>Envío <?= $envio == 0 ? '<span class="text-success">(Gratis!)</span>' : '' ?></td>
+                                <td class="text-end">$<?= number_format($envio, 0, ',', '.') ?></td>
+                            </tr>
+                            <?php if ($envio > 0): ?>
+                            <tr>
+                                <td colspan="2" class="text-end text-muted small">
+                                    ¡Envío gratis a partir de $30.000!
+                                </td>
+                            </tr>
+                            <?php endif; ?>
+                            <tr class="fs-4 fw-bold">
+                                <td>Total a pagar</td>
+                                <td class="text-end text-success">$<?= number_format($total, 0, ',', '.') ?></td>
+                            </tr>
+                        </table>
 
-        <div class="mt-4 text-end">
-            <p><strong>Subtotal:</strong> $<?= number_format($subtotal, 2, ',', '.') ?></p>
-            <p><strong>Envío:</strong> $<?= number_format($envio, 2, ',', '.') ?></p>
-            <p class="fs-4"><strong>Total:</strong> $<?= number_format($total, 2, ',', '.') ?></p>
-
-            <a href="../producto/producto.php" class="btn btn-dark btn-lg me-2">
-                Seguir Comprando
-            </a>
-            <a href="../compra/finalizarCompra.php" class="btn btn-success btn-lg">
-                Finalizar Compra
-            </a>
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="../producto/producto.php" class="btn btn-outline-dark btn-lg">
+                                Seguir comprando
+                            </a>
+                            <a href="../compra/finalizarCompra.php" class="btn btn-success btn-lg px-5">
+                                Finalizar Compra
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
+        <!--- Opción de vaciar carrito (opcional) -->
+        <div class="text-center mt-4">
+            <a href="accion/accionVaciarCarrito.php" 
+               class="text-danger small" 
+               onclick="return confirm('¿Vaciar todo el carrito?')">
+                Vaciar carrito
+            </a>
+        </div>
     <?php endif; ?>
 </div>
 </main>

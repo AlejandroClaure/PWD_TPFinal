@@ -106,7 +106,7 @@ $imgDir     = dirname(__DIR__, 1) . "/imagenes/productos/";
                     Stock: <?= $stock; ?>
                 </p>
 
-                <a href="<?= $GLOBALS['VISTA_URL']; ?>compra/accion/agregarCarrito.php?id=<?= $prod->getIdProducto(); ?>"
+                <a href="<?= $GLOBALS['VISTA_URL']; ?>compra/accion/accionAgregarItemCarrito.php?id=<?= $prod->getIdProducto(); ?>"
                    class="btn btn-warning w-100 <?= $stock <= 0 ? 'disabled' : ''; ?>">
                     <i class="fa fa-shopping-cart"></i>
                     <?= $stock > 0 ? 'Agregar al carrito' : 'Sin stock'; ?>

@@ -4,7 +4,7 @@ include_once $GLOBALS['VISTA_PATH'] . "estructura/cabecera.php";
 
 $abmProducto = new AbmProducto();
 
-$prefijoCategoria = strtolower(str_replace("/", "_", str_replace(".php","", "celulares/apple/accesorios.php"))) . "_";
+$prefijoCategoria = strtolower(str_replace("/", "_", str_replace(".php","", "celulares/samsung.php"))) . "_";
 
 $productos = $abmProducto->listar();
 
@@ -35,7 +35,7 @@ foreach ($productos as $p) {
 ?>
 
 <div class='container mt-4 pt-4'>
-    <h1 class='mb-4'><?= htmlspecialchars("Accesorios") ?></h1>
+    <h1 class='mb-4'><?= htmlspecialchars("Samsung") ?></h1>
 
     <div class='row g-3'>
         <?php if (empty($productosFiltrados)): ?>
@@ -66,7 +66,7 @@ foreach ($productos as $p) {
 
                         <p class='text-muted'>Stock: <?= $stock ?></p>
 
-                        <a href='<?= $GLOBALS['VISTA_URL'] ?>compra/accion/agregarCarrito.php?id=<?= $p->getIdProducto() ?>'
+                        <a href='<?= $GLOBALS['VISTA_URL'] ?>compra/accion/accionAgregarItemCarrito.php?id=<?= $p->getIdProducto() ?>'
                            class='btn btn-warning w-100 <?= $stock <= 0 ? "disabled" : "" ?>'>
                            <?= $stock > 0 ? "Agregar al carrito" : "Sin stock" ?>
                         </a>

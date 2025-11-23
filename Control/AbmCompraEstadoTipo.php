@@ -48,4 +48,12 @@ class AbmCompraEstadoTipo
 
         return (new CompraEstadoTipo())->listar($where);
     }
+
+    public function buscarPorDescripcion($descripcion)
+{
+    $modelo = new CompraEstadoTipo();
+    $tipos = $modelo->listar("cetdescripcion = '$descripcion'");
+    return $tipos[0] ?? null;
+}
+
 }

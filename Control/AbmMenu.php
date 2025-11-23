@@ -306,7 +306,7 @@ foreach (\$productos as \$p) {
 
                         <p class='text-muted'>Stock: <?= \$stock ?></p>
 
-                        <a href='<?= \$GLOBALS['VISTA_URL'] ?>compra/accion/agregarCarrito.php?id=<?= \$p->getIdProducto() ?>'
+                        <a href='<?= \$GLOBALS['VISTA_URL'] ?>compra/accion/accionModificarCarrito.php?id=<?= \$p->getIdProducto() ?>'
                            class='btn btn-warning w-100 <?= \$stock <= 0 ? "disabled" : "" ?>'>
                            <?= \$stock > 0 ? "Agregar al carrito" : "Sin stock" ?>
                         </a>

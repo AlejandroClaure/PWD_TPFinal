@@ -1,12 +1,14 @@
 <?php
-class Compra extends BaseDatos {
+class Compra extends BaseDatos
+{
 
     private $idcompra;
     private $cofecha;
     private $idusuario;
     private $mensajeoperacion;
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
         $this->idcompra = 0;
         $this->cofecha = "";
@@ -14,27 +16,53 @@ class Compra extends BaseDatos {
         $this->mensajeoperacion = "";
     }
 
-    public function setear($id, $fecha, $idusuario) {
+    public function setear($id, $fecha, $idusuario)
+    {
         $this->setIdCompra($id);
         $this->setCoFecha($fecha);
         $this->setIdUsuario($idusuario);
     }
 
-    
-    public function getIdCompra() { return $this->idcompra; }
-    public function setIdCompra($valor) { $this->idcompra = $valor; }
 
-    public function getCoFecha() { return $this->cofecha; }
-    public function setCoFecha($valor) { $this->cofecha = $valor; }
+    public function getIdCompra()
+    {
+        return $this->idcompra;
+    }
+    public function setIdCompra($valor)
+    {
+        $this->idcompra = $valor;
+    }
 
-    public function getIdUsuario() { return $this->idusuario; }
-    public function setIdUsuario($valor) { $this->idusuario = $valor; }
+    public function getCoFecha()
+    {
+        return $this->cofecha;
+    }
+    public function setCoFecha($valor)
+    {
+        $this->cofecha = $valor;
+    }
 
-    public function getMensajeOperacion() { return $this->mensajeoperacion; }
-    public function setMensajeOperacion($valor) { $this->mensajeoperacion = $valor; }
+    public function getIdUsuario()
+    {
+        return $this->idusuario;
+    }
+    public function setIdUsuario($valor)
+    {
+        $this->idusuario = $valor;
+    }
+
+    public function getMensajeOperacion()
+    {
+        return $this->mensajeoperacion;
+    }
+    public function setMensajeOperacion($valor)
+    {
+        $this->mensajeoperacion = $valor;
+    }
 
 
-    public function cargar() {
+    public function cargar()
+    {
         $resp = false;
         $sql = "SELECT * FROM compra WHERE idcompra = " . $this->getIdCompra();
 
@@ -49,7 +77,8 @@ class Compra extends BaseDatos {
     }
 
 
-    public function insertar() {
+    public function insertar()
+    {
         $resp = false;
         $sql = "INSERT INTO compra (cofecha, idusuario)
                 VALUES (
@@ -72,7 +101,8 @@ class Compra extends BaseDatos {
     }
 
 
-    public function modificar() {
+    public function modificar()
+    {
         $resp = false;
 
         $sql = "UPDATE compra SET
@@ -90,7 +120,8 @@ class Compra extends BaseDatos {
     }
 
 
-    public function eliminar() {
+    public function eliminar()
+    {
         $resp = false;
 
         $sql = "DELETE FROM compra WHERE idcompra = " . $this->getIdCompra();
@@ -105,7 +136,8 @@ class Compra extends BaseDatos {
     }
 
 
-    public function listar($parametro = "") {
+    public function listar($parametro = "")
+    {
         $arreglo = array();
         $sql = "SELECT * FROM compra";
 
@@ -128,5 +160,8 @@ class Compra extends BaseDatos {
 
         return $arreglo;
     }
+    public function listarPorUsuario($idusuario)
+    {
+        return $this->listar("idusuario = $idusuario ORDER BY cofecha DESC");
+    }
 }
-?>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 22-11-2025 a las 21:26:48
+-- Tiempo de generación: 23-11-2025 a las 00:34:31
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -33,6 +33,13 @@ CREATE TABLE `compra` (
   `idusuario` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Volcado de datos para la tabla `compra`
+--
+
+INSERT INTO `compra` (`idcompra`, `cofecha`, `idusuario`) VALUES
+(17, '2025-11-22 20:30:09', 4);
+
 -- --------------------------------------------------------
 
 --
@@ -46,6 +53,13 @@ CREATE TABLE `compraestado` (
   `cefechaini` timestamp NOT NULL DEFAULT current_timestamp(),
   `cefechafin` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `compraestado`
+--
+
+INSERT INTO `compraestado` (`idcompraestado`, `idcompra`, `idcompraestadotipo`, `cefechaini`, `cefechafin`) VALUES
+(17, 17, 1, '2025-11-22 20:30:09', NULL);
 
 -- --------------------------------------------------------
 
@@ -82,6 +96,13 @@ CREATE TABLE `compraitem` (
   `cicantidad` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Volcado de datos para la tabla `compraitem`
+--
+
+INSERT INTO `compraitem` (`idcompraitem`, `idproducto`, `idcompra`, `cicantidad`) VALUES
+(17, 55, 17, 2);
+
 -- --------------------------------------------------------
 
 --
@@ -102,7 +123,10 @@ CREATE TABLE `menu` (
 --
 
 INSERT INTO `menu` (`idmenu`, `menombre`, `melink`, `medescripcion`, `idpadre`, `medeshabilitado`) VALUES
-(173, 'celulares', 'celulares.php', 'celulares.php', NULL, NULL);
+(179, 'celulares', 'celulares.php', 'celulares.php', NULL, NULL),
+(183, 'Apple', 'celulares/apple.php', 'celulares/apple.php', 179, NULL),
+(185, 'Accesorios', 'celulares/apple/accesorios.php', 'celulares/apple/accesorios.php', 183, NULL),
+(186, 'Samsungs', 'celulares/samsungs.php', 'celulares/samsungs.php', 179, NULL);
 
 -- --------------------------------------------------------
 
@@ -126,6 +150,8 @@ CREATE TABLE `producto` (
   `pronombre` varchar(100) NOT NULL,
   `prodetalle` varchar(512) NOT NULL DEFAULT '',
   `proprecio` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `prooferta` int(11) DEFAULT 0,
+  `profinoffer` datetime DEFAULT NULL,
   `proimagen` varchar(255) DEFAULT NULL,
   `procantstock` int(11) NOT NULL DEFAULT 0,
   `idusuario` bigint(20) NOT NULL,
@@ -136,9 +162,9 @@ CREATE TABLE `producto` (
 -- Volcado de datos para la tabla `producto`
 --
 
-INSERT INTO `producto` (`idproducto`, `pronombre`, `prodetalle`, `proprecio`, `proimagen`, `procantstock`, `idusuario`, `prodeshabilitado`) VALUES
-(53, 'celulares_motorola_Moto Edge 50 Pro', 'El Motorola Edge 50 Pro combina diseño y tecnología de punta para ofrecer una experiencia móvil superior.', 779990.00, 'Moto_Edge_50_Pro_1763822539.png', 5, 4, NULL),
-(55, 'celulares_apple_ipad air', 'Apple iPad Air 11, chip M3, Wi-Fi, 128 GB, gris espacial - Distribuidor Autorizado', 1556999.00, 'ipad_air_1763827015.png', 5, 4, NULL);
+INSERT INTO `producto` (`idproducto`, `pronombre`, `prodetalle`, `proprecio`, `prooferta`, `profinoffer`, `proimagen`, `procantstock`, `idusuario`, `prodeshabilitado`) VALUES
+(53, 'celulares_motorola_Moto Edge 50 Pro', 'El Motorola Edge 50 Pro combina diseño y tecnología de punta para ofrecer una experiencia móvil superior.', 779990.00, 5, '2025-11-04 18:04:24', 'Moto_Edge_50_Pro_1763822539.png', 5, 4, NULL),
+(55, 'celulares_apple_ipad air', 'Apple iPad Air 11, chip M3, Wi-Fi, 128 GB, gris espacial - Distribuidor Autorizado', 1556999.00, 0, NULL, 'ipad_air_1763827015.png', 3, 4, NULL);
 
 -- --------------------------------------------------------
 
@@ -295,25 +321,25 @@ ALTER TABLE `usuariorol`
 -- AUTO_INCREMENT de la tabla `compra`
 --
 ALTER TABLE `compra`
-  MODIFY `idcompra` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `idcompra` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `compraestado`
 --
 ALTER TABLE `compraestado`
-  MODIFY `idcompraestado` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `idcompraestado` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `compraitem`
 --
 ALTER TABLE `compraitem`
-  MODIFY `idcompraitem` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `idcompraitem` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `menu`
 --
 ALTER TABLE `menu`
-  MODIFY `idmenu` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=174;
+  MODIFY `idmenu` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=187;
 
 --
 -- AUTO_INCREMENT de la tabla `producto`
