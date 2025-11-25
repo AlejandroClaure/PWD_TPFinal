@@ -1,4 +1,7 @@
 <?php
+
+date_default_timezone_set('America/Argentina/Buenos_Aires');
+
 // ----------------------------------------------------
 // Nombre del proyecto (carpeta bajo document_root)
 // ----------------------------------------------------
@@ -75,5 +78,6 @@ define("COMPRA_ESTADO_INICIADA", 1);
 define("COMPRA_ESTADO_ACEPTADA", 2);
 define("COMPRA_ESTADO_ENVIADA", 3);
 define("COMPRA_ESTADO_CANCELADA", 4);
+define("COMPRA_ESTADO_FINALIZADA", 5);
 
 ?>

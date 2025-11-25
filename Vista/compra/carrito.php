@@ -157,7 +157,7 @@ include_once '../estructura/cabecera.php';
                             <a href="../producto/producto.php" class="btn btn-outline-dark btn-lg">
                                 Seguir comprando
                             </a>
-                            <a href="../compra/finalizarCompra.php" class="btn btn-success btn-lg px-5">
+                            <a href="../compra/accion/accionFinalizarCompra.php" class="btn btn-success btn-lg px-5">
                                 Finalizar Compra
                             </a>
                         </div>

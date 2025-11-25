@@ -58,10 +58,10 @@ class AbmCompraItem
     // --------------------------------------------------
     // Obtener compra iniciada del usuario (si no existe crea)
     // --------------------------------------------------
-   private function getCompraIniciada($usuarioId)
-{
-    // Buscar compras que estén en estado INICIADA
-    $sql = "
+    private function getCompraIniciada($usuarioId)
+    {
+        // Buscar compras que estén en estado INICIADA
+        $sql = "
         idcompra IN (
             SELECT idcompra 
             FROM compraestado 
@@ -69,41 +69,41 @@ class AbmCompraItem
         )
         AND idusuario = " . intval($usuarioId);
 
-    // Llamada correcta (no estática)
-    $objCompra = new Compra();
-    $compras = $objCompra->listar($sql);
+        // Llamada correcta (no estática)
+        $objCompra = new Compra();
+        $compras = $objCompra->listar($sql);
 
-    // Si existe, retornarla
-    if (!empty($compras)) {
-        return $compras[0];
+        // Si existe, retornarla
+        if (!empty($compras)) {
+            return $compras[0];
+        }
+
+        // Si no existe, crear nueva compra
+        $abmCompra = new AbmCompra();
+
+        $nuevaCompraObj = $abmCompra->alta([
+            "cofecha" => date("Y-m-d H:i:s"),
+            "idusuario" => $usuarioId
+        ]);
+
+        if (!$nuevaCompraObj) {
+            return null; // por seguridad
+        }
+
+        // Cargar objeto compra recién creada
+        $compra = new Compra();
+        $compra->setIdCompra($nuevaCompraObj->getIdCompra());
+        $compra->cargar();
+
+        // Crear estado INICIADA
+        $abmEstado = new AbmCompraEstado();
+        $abmEstado->alta([
+            "idcompra" => $compra->getIdCompra(),
+            "idcompraestadotipo" => COMPRA_ESTADO_INICIADA
+        ]);
+
+        return $compra;
     }
-
-    // Si no existe, crear nueva compra
-    $abmCompra = new AbmCompra();
-
-    $nuevaCompraObj = $abmCompra->alta([
-        "cofecha" => date("Y-m-d H:i:s"),
-        "idusuario" => $usuarioId
-    ]);
-
-    if (!$nuevaCompraObj) {
-        return null; // por seguridad
-    }
-
-    // Cargar objeto compra recién creada
-    $compra = new Compra();
-    $compra->setIdCompra($nuevaCompraObj->getIdCompra());
-    $compra->cargar();
-
-    // Crear estado INICIADA
-    $abmEstado = new AbmCompraEstado();
-    $abmEstado->alta([
-        "idcompra" => $compra->getIdCompra(),
-        "idcompraestadotipo" => COMPRA_ESTADO_INICIADA
-    ]);
-
-    return $compra;
-}
 
 
 
@@ -232,22 +232,60 @@ class AbmCompraItem
     }
 
     /**
- * Vacía completamente el carrito del usuario
- */
-public function vaciarCarrito($usuarioId) {
-    $compra = $this->getCompraIniciada($usuarioId);
-    $items = $this->buscar(['idcompra' => $compra->getIdCompra()]);
-    
-    $eliminados = 0;
-    foreach ($items as $item) {
-        if ($this->baja(['idcompraitem' => $item->getIdCompraItem()])) {
-            $eliminados++;
+     * Vacía completamente el carrito del usuario
+     */
+    public function vaciarCarrito($usuarioId)
+    {
+        $compra = $this->getCompraIniciada($usuarioId);
+        $items = $this->buscar(['idcompra' => $compra->getIdCompra()]);
+
+        $eliminados = 0;
+        foreach ($items as $item) {
+            if ($this->baja(['idcompraitem' => $item->getIdCompraItem()])) {
+                $eliminados++;
+            }
         }
+
+        // Actualizar sesión
+        $this->cargarCarritoSesion($usuarioId);
+
+        return $eliminados;
     }
-    
-    // Actualizar sesión
-    $this->cargarCarritoSesion($usuarioId);
-    
-    return $eliminados;
-}
+
+    public function transferirCarritoACompra($idUsuario, $idCompraDestino)
+    {
+        // 1) Obtener la compra "carrito" actual del usuario (la que contiene los items)
+        $compraOrigen = $this->getCompraIniciada($idUsuario);
+        if (!$compraOrigen) {
+            return false; // no hay carrito
+        }
+
+        // 2) Traer items de la compra origen
+        $itemsOrigen = $this->buscar(['idcompra' => $compraOrigen->getIdCompra()]);
+        if (empty($itemsOrigen)) {
+            return false; // no hay items que transferir
+        }
+
+        // 3) Preparar objeto Compra destino correctamente cargado
+        $compraDestino = new Compra();
+        $compraDestino->setIdCompra(intval($idCompraDestino));
+        $compraDestino->cargar();
+
+        // 4) Insertar cada item en la compra destino
+        foreach ($itemsOrigen as $itemOrigen) {
+            $prod = $itemOrigen->getObjProducto(); // ya es objeto Producto
+            $cantidad = $itemOrigen->getCiCantidad();
+
+            $nuevoItem = new CompraItem();
+            $nuevoItem->setear(
+                0,
+                $compraDestino,
+                $prod,
+                $cantidad
+            );
+            $nuevoItem->insertar();
+        }
+
+        return true;
+    }
 }
