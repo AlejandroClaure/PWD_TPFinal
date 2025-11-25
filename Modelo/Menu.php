@@ -144,16 +144,19 @@ class Menu extends BaseDatos
             ? (is_object($this->objmenupadre) ? $this->objmenupadre->getIdMenu() : intval($this->objmenupadre))
             : "NULL";
 
-        $melink = !empty($this->melink) ? "'{$this->melink}'" : "NULL";
+        $melink = !empty($this->melink) ? "'" . addslashes($this->melink) . "'" : "NULL";
 
-        //ANTERIOR: $deshab = !empty($this->medeshabilitado) ? "'{$this->medeshabilitado}'" : "NULL";
-        $deshab = ($this->medeshabilitado === null || $this->medeshabilitado === "" || $this->medeshabilitado === "0000-00-00 00:00:00")
-            ? "NULL"
-            : "'{$this->medeshabilitado}''";
-        $descripcion = $this->medescripcion ?? "";
+        // Manejo unificado de medeshabilitado
+        if ($this->medeshabilitado === null || $this->medeshabilitado === "" || $this->medeshabilitado === "0000-00-00 00:00:00") {
+            $deshab = "'0000-00-00 00:00:00'"; // habilitado
+        } else {
+            $deshab = "'" . addslashes($this->medeshabilitado) . "'"; // fecha válida
+        }
+
+        $descripcion = addslashes($this->medescripcion ?? "");
 
         $sql = "INSERT INTO menu (menombre, melink, idpadre, medescripcion, medeshabilitado)
-            VALUES ('{$this->menombre}', {$melink}, {$idpadre}, '{$descripcion}', {$deshab})";
+            VALUES ('" . addslashes($this->menombre) . "', $melink, $idpadre, '$descripcion', $deshab)";
 
         if ($this->Iniciar()) {
             $id = $this->Ejecutar($sql);
@@ -162,64 +165,54 @@ class Menu extends BaseDatos
                 return true;
             } else {
                 $this->mensajeoperacion = "menu->insertar: " . $this->getError();
-                error_log($this->mensajeoperacion); // log para depuración
             }
         } else {
             $this->mensajeoperacion = "menu->insertar: no se pudo iniciar BD";
-            error_log($this->mensajeoperacion);
         }
 
         return false;
     }
+
 
 
     public function modificar()
-{
-    // --- ID PADRE ---
-    $idpadre = "NULL";
-    if ($this->objmenupadre !== null && $this->objmenupadre instanceof Menu) {
-        $idpadre = $this->objmenupadre->getIdMenu();
-    }
+    {
+        $idpadre = ($this->objmenupadre instanceof Menu)
+            ? $this->objmenupadre->getIdMenu()
+            : "NULL";
 
-    // --- CAMPOS ---
-    $menombre = addslashes($this->menombre);
-    $melink = addslashes($this->melink);
-    $medescripcion = addslashes($this->medescripcion);
+        $menombre = addslashes($this->menombre);
+        $melink = !empty($this->melink) ? "'" . addslashes($this->melink) . "'" : "NULL";
+        $medescripcion = addslashes($this->medescripcion);
 
-    // --- LOGICA DE HABILITAR / DESHABILITAR ---
-    // Front envia: 1 = deshabilitar / 0 = habilitar
-    if ($this->medeshabilitado == 1) {
-        // DESHABILITAR → fecha actual
-        $medeshabilitado = "'" . date("Y-m-d H:i:s") . "'";
-    } else {
-        // HABILITAR → valor por defecto
-        $medeshabilitado = "'0000-00-00 00:00:00'";
-    }
+        // Unificar lógica: 1=deshabilitar → fecha / 0=habilitar → 0000-00-00
+        if ($this->medeshabilitado == 1) {
+            $medeshabilitado = "'" . date("Y-m-d H:i:s") . "'";
+        } else {
+            $medeshabilitado = "'0000-00-00 00:00:00'";
+        }
 
-    // --- QUERY FINAL ---
-    $sql = "UPDATE menu SET
-                menombre = '$menombre',
-                melink = '$melink',
-                idpadre = $idpadre,
-                medescripcion = '$medescripcion',
-                medeshabilitado = $medeshabilitado
+        $sql = "UPDATE menu SET
+            menombre = '$menombre',
+            melink = $melink,
+            idpadre = $idpadre,
+            medescripcion = '$medescripcion',
+            medeshabilitado = $medeshabilitado
             WHERE idmenu = {$this->idmenu}";
 
-    // --- EJECUCIÓN ---
-    if ($this->Iniciar()) {
-        $res = $this->Ejecutar($sql);
-        if ($res === false) {
-            $this->mensajeoperacion = "menu->modificar: " . $this->getError();
-            error_log($this->mensajeoperacion);
+        if ($this->Iniciar()) {
+            $res = $this->Ejecutar($sql);
+            if ($res === false) {
+                $this->mensajeoperacion = "menu->modificar: " . $this->getError();
+                return false;
+            }
+            return true;
+        } else {
+            $this->mensajeoperacion = "menu->modificar: no se pudo iniciar BD";
             return false;
         }
-        return true;
-    } else {
-        $this->mensajeoperacion = "menu->modificar: no se pudo iniciar BD";
-        error_log($this->mensajeoperacion);
-        return false;
     }
-}
+
 
 
     public function eliminar()

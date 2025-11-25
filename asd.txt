@@ -1,8 +1,0 @@
-Vista/producto/accion/accionAumentarStockProducto.php
-Vista/producto/accion/accionCrearProducto.php
-Vista/producto/accion/accionEditarDetalleProducto.php
-Vista/producto/accion/accionEditarOfertaProducto.php
-Vista/producto/accion/accionEditarPrecioProducto.php
-Vista/producto/accion/accionEditarStockProducto.php
-Vista/producto/accion/accionReducirStockProducto.php
-Vista/producto/accion/accionToggleVisibilidadProducto.php

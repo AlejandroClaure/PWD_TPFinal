@@ -31,6 +31,35 @@ foreach ($menus as $m) {
     }
 }
 
+$tree = [];
+$byId = [];
+
+// Crear nodos
+foreach ($menus as $m) {
+    $id = $m->getIdMenu();
+    $byId[$id] = $m;
+
+    $tree[$id] = [
+        'menu' => $m,
+        'children' => []
+    ];
+}
+
+$root = []; // categorías principales
+
+foreach ($menus as $m) {
+    $id = $m->getIdMenu();
+    $padre = $m->getObjMenuPadre();
+
+    if ($padre === null) {
+        // SIN padre → categoría raíz
+        $root[$id] = &$tree[$id];
+    } else {
+        // insertarlo como hijo del padre
+        $tree[$padre->getIdMenu()]['children'][] = &$tree[$id];
+    }
+}
+
 $ok = $_GET['ok'] ?? null;
 $toggle = $_GET['toggle'] ?? null;
 
@@ -97,12 +126,13 @@ include_once dirname(__DIR__, 1) . '/estructura/cabecera.php';
         </div>
     </div>
 
-    <!-- ================= CREAR PRODUCTO (se deja igual que antes) ================= -->
+    <!-- ================= CREAR PRODUCTO  ================= -->
     <div class="card mb-4">
         <div class="card-header bg-success text-white">Agregar nuevo producto</div>
         <div class="card-body">
             <form action="../producto/accion/accionCrearProducto.php" method="POST" enctype="multipart/form-data">
                 <div class="row g-3">
+
                     <div class="col-md-6">
                         <label>Nombre</label>
                         <input type="text" name="pronombre" class="form-control" required>
@@ -117,14 +147,29 @@ include_once dirname(__DIR__, 1) . '/estructura/cabecera.php';
                         <label>Sección</label>
                         <select name="categoria" class="form-select" required>
                             <option value="">-- Seleccionar --</option>
-                            <?php foreach ($padres as $p): ?>
-                                <option value="<?= htmlspecialchars($p->getMeNombre()); ?>"><?= htmlspecialchars($p->getMeNombre()); ?></option>
-                                <?php if (isset($hijosMap[$p->getIdMenu()])): ?>
-                                    <?php foreach ($hijosMap[$p->getIdMenu()] as $h): ?>
-                                        <option value="<?= htmlspecialchars($h->getMeNombre()); ?>">&nbsp;&nbsp;↳ <?= htmlspecialchars($h->getMeNombre()); ?></option>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
+
+                            <?php
+                            function printMenuOptions($node, $level = 0)
+                            {
+                                $menu = $node['menu'];
+                                $indent = str_repeat("&nbsp;&nbsp;&nbsp;", $level);
+                                $arrow = $level > 0 ? "↳ " : "";
+
+                                echo "<option value='" . $menu->getIdMenu() . "'>";
+                                echo $indent . $arrow . htmlspecialchars($menu->getMeNombre(), ENT_QUOTES, 'UTF-8');
+                                echo "</option>";
+
+                                foreach ($node['children'] as $child) {
+                                    printMenuOptions($child, $level + 1);
+                                }
+                            }
+
+                            // Imprimir opciones del select
+                            foreach ($root as $node) {
+                                printMenuOptions($node, 0);
+                            }
+                            ?>
+
                         </select>
                     </div>
 
@@ -148,66 +193,81 @@ include_once dirname(__DIR__, 1) . '/estructura/cabecera.php';
                             <i class="fa fa-plus"></i> Agregar producto
                         </button>
                     </div>
+
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- ================= LISTADO DEL MENÚ ================= -->
-    <div class="card">
-        <div class="card-header bg-dark text-white">Estructura actual</div>
+
+    <!-- ================= LISTADO DEL MENÚ  ================= -->
+    <div class="card mt-4">
+        <div class="card-header bg-dark text-white">
+            <h4>Estructura actual del menú</h4>
+        </div>
         <div class="card-body">
-            <?php if (empty($padres)): ?>
-                <p class="text-muted">No hay menús creados.</p>
+            <?php if (empty($root)): ?>
+                <p class="text-muted">No hay secciones creadas aún.</p>
             <?php else: ?>
-                <div class="list-group">
-                    <?php foreach ($padres as $p): ?>
-                        <div class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong><?= htmlspecialchars($p->getMeNombre()); ?></strong>
-                                </div>
-                                <div class="btn-group">
-                                    <a href="accion/accionToggleVisibilidad.php?idmenu=<?= $p->getIdMenu(); ?>" class="btn btn-sm btn-outline-info">
-                                        <?= ($h->getMeDeshabilitado() !== "0000-00-00 00:00:00") ? "👁️" : "🚫"; ?>
-                                    </a>
-                                    <a href="<?= $GLOBALS['VISTA_URL']; ?>menus/editarMenu.php?idmenu=<?= $p->getIdMenu(); ?>" class="btn btn-sm btn-outline-warning">Editar</a>
-                                    <a href="accion/accionEliminarMenus.php?idmenu=<?= $p->getIdMenu(); ?>" class="btn btn-sm btn-outline-danger"
-                                        onclick="return confirm('Eliminar sección y archivos asociados de forma permanente? Esta acción no se puede deshacer.');">
-                                        Eliminar
-                                    </a>
+                <div class="list-group list-group-flush">
+
+                    <?php
+                    // Función recursiva para mostrar todo el árbol
+                    function mostrarMenuJerarquico($nodos, $nivel = 0)
+                    {
+                        foreach ($nodos as $nodo) {
+                            $menu = $nodo['menu'];
+                            $deshabilitado = $menu->getMeDeshabilitado();
+                            $esVisible = $deshabilitado === null || $deshabilitado === '0000-00-00 00:00:00';
+
+                            $indentacion = str_repeat('    ', $nivel); // 4 espacios por nivel
+                            $prefijo = $nivel > 0 ? '└─ ' : '';
+                            $colorFondo = !$esVisible ? 'background-color: #f8d7da;' : '';
+                    ?>
+                            <div class="list-group-item border-0" style="<?= $colorFondo ?>">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>
+                                            <?= $indentacion ?><?= $prefijo ?><?= htmlspecialchars($menu->getMeNombre()) ?>
+                                        </strong>
+                                        <?php if (!$esVisible): ?>
+                                            <span class="badge bg-danger ms-2">Oculto</span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="accion/accionToggleVisibilidad.php?idmenu=<?= $menu->getIdMenu() ?>"
+                                            class="btn <?= $esVisible ? 'btn-outline-danger' : 'btn-outline-success' ?> btn-sm"
+                                            title="<?= $esVisible ? 'Ocultar' : 'Mostrar' ?>">
+                                            <?= $esVisible ? 'Ocultar' : 'Mostrar' ?>
+                                        </a>
+                                        <a href="<?= $GLOBALS['VISTA_URL'] ?>menus/editarMenu.php?idmenu=<?= $menu->getIdMenu() ?>"
+                                            class="btn btn-outline-warning btn-sm">Editar</a>
+                                        <a href="accion/accionEliminarMenus.php?idmenu=<?= $menu->getIdMenu() ?>"
+                                            class="btn btn-outline-danger btn-sm"
+                                            onclick="return confirm('¿Eliminar esta sección? Esta acción no se puede deshacer.');">
+                                            Eliminar
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
 
-                            <?php if (isset($hijosMap[$p->getIdMenu()])): ?>
-                                <ul class="mt-2 ms-3">
-                                    <?php foreach ($hijosMap[$p->getIdMenu()] as $h): ?>
-                                        <li class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <?= htmlspecialchars($h->getMeNombre()); ?>
-                                            </div>
-                                            <div class="btn-group">
-                                                <a href="accion/accionToggleVisibilidad.php?idmenu=<?= $h->getIdMenu(); ?>" class="btn btn-sm btn-outline-info">
-                                                    <?= ($h->getMeDeshabilitado() !== "0000-00-00 00:00:00") ? "👁️" : "🚫"; ?>
-                                                </a>
-                                                <a href="<?= $GLOBALS['VISTA_URL']; ?>menus/editarMenu.php?idmenu=<?= $h->getIdMenu(); ?>" class="btn btn-sm btn-outline-warning">Editar</a>
-                                                <a href="accion/accionEliminarMenus.php?idmenu=<?= $h->getIdMenu(); ?>" class="btn btn-sm btn-outline-danger"
-                                                    onclick="return confirm('Eliminar sub-sección y archivos asociados de forma permanente? Esta acción no se puede deshacer.');">
-                                                    Eliminar
-                                                </a>
-                                            </div>
-                                        </li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            <?php endif; ?>
-                        </div>
-                    <?php endforeach; ?>
+                            <?php
+                            if (!empty($nodo['children'])) {
+                                mostrarMenuJerarquico($nodo['children'], $nivel + 1);
+                            }
+                            ?>
+                    <?php
+                        }
+                    }
+
+                    // Mostrar todo el árbol desde la raíz
+                    mostrarMenuJerarquico($root);
+                    ?>
+
                 </div>
             <?php endif; ?>
         </div>
     </div>
-
-    <!-- ================= GESTIÓN DE PRODUCTOS EXISTENTES ================= -->
     <!-- ================= GESTIÓN DE PRODUCTOS EXISTENTES ================= -->
     <div class="card mt-5 shadow-sm border-0">
         <div class="card-header bg-primary text-white">
@@ -360,6 +420,26 @@ include_once dirname(__DIR__, 1) . '/estructura/cabecera.php';
         </div>
     </div>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const tipo = document.getElementById("tipo");
+            const bloquePadre = document.getElementById("bloquePadre");
+
+            function togglePadre() {
+                if (tipo.value === "sub") {
+                    bloquePadre.style.display = "block";
+                } else {
+                    bloquePadre.style.display = "none";
+                }
+            }
+
+            // Ejecutar al cambiar
+            tipo.addEventListener("change", togglePadre);
+
+            // Ejecutar una vez por si hay valores cargados
+            togglePadre();
+        });
+    </script>
 
 
     <?php include_once dirname(__DIR__, 1) . '/estructura/pie.php'; ?>

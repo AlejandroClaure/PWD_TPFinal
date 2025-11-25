@@ -24,8 +24,8 @@ $datos = [
 $abmProducto = new AbmProducto();
 
 if ($abmProducto->crear($datos)) {
-    header("Location: ../gestionMenus.php?ok=1");
+    header("Location: ../../menus/gestionMenus.php?ok=1");
 } else {
-    header("Location: ../gestionMenus.php?ok=0");
+    header("Location: ../../menus/gestionMenus.php?ok=0");
 }
 exit;
