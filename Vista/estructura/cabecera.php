@@ -22,7 +22,7 @@ if ($usuario) {
    🔹 NUEVO: obtener TODOS los menús visibles (medeshabilitado = 0)
    ----------------------------------------------------- */
 $abmMenu = new AbmMenu();
-$menus = $abmMenu->buscar("medeshabilitado = 0");
+$menus = $abmMenu->buscar("medeshabilitado = '0000-00-00 00:00:00'");
 
 /* -----------------------------------------------------
    🔹 Agrupar padres e hijos

@@ -1,6 +1,7 @@
 <?php
 
-class Menu extends BaseDatos{
+class Menu extends BaseDatos
+{
 
     private $idmenu;
     private $menombre;
@@ -10,7 +11,8 @@ class Menu extends BaseDatos{
     private $medeshabilitado;
     private $mensajeoperacion;
 
-    public function __construct(){
+    public function __construct()
+    {
         parent::__construct();
         $this->idmenu = null;
         $this->menombre = "";
@@ -21,7 +23,8 @@ class Menu extends BaseDatos{
         $this->mensajeoperacion = "";
     }
 
-    public function setear($idmenu, $menombre, $melink, $objpadre, $medescripcion, $medeshabilitado){
+    public function setear($idmenu, $menombre, $melink, $objpadre, $medescripcion, $medeshabilitado)
+    {
         $this->idmenu = $idmenu;
         $this->menombre = $menombre;
         $this->melink = $melink;
@@ -32,57 +35,72 @@ class Menu extends BaseDatos{
 
     // ======== GETTERS & SETTERS ========
 
-    public function getIdMenu(){
+    public function getIdMenu()
+    {
         return $this->idmenu;
     }
-    public function setIdMenu($id){
+    public function setIdMenu($id)
+    {
         $this->idmenu = $id;
     }
 
-    public function getMeNombre(){
+    public function getMeNombre()
+    {
         return $this->menombre;
     }
-    public function setMeNombre($n){
+    public function setMeNombre($n)
+    {
         $this->menombre = $n;
     }
 
-    public function getMeLink(){
+    public function getMeLink()
+    {
         return $this->melink;
     }
-    public function setMeLink($l){
+    public function setMeLink($l)
+    {
         $this->melink = $l;
     }
 
-    public function getObjMenuPadre(){
+    public function getObjMenuPadre()
+    {
         return $this->objmenupadre;
     }
-    public function setObjMenuPadre($o){
+    public function setObjMenuPadre($o)
+    {
         $this->objmenupadre = $o;
     }
 
-    public function getMeDescripcion(){
+    public function getMeDescripcion()
+    {
         return $this->medescripcion;
     }
-    public function setMeDescripcion($d){
+    public function setMeDescripcion($d)
+    {
         $this->medescripcion = $d;
     }
 
-    public function getMeDeshabilitado(){
+    public function getMeDeshabilitado()
+    {
         return $this->medeshabilitado;
     }
-    public function setMeDeshabilitado($d){
+    public function setMeDeshabilitado($d)
+    {
         $this->medeshabilitado = $d;
     }
 
-    public function getMensajeOperacion(){
+    public function getMensajeOperacion()
+    {
         return $this->mensajeoperacion;
     }
-    public function setMensajeOperacion($m){
+    public function setMensajeOperacion($m)
+    {
         $this->mensajeoperacion = $m;
     }
 
 
-    public function cargar(){
+    public function cargar()
+    {
 
         $resp = false;
         $sql = "SELECT * FROM menu WHERE idmenu = " . $this->idmenu;
@@ -120,13 +138,18 @@ class Menu extends BaseDatos{
     }
 
 
-    public function insertar(){
+    public function insertar()
+    {
         $idpadre = (!empty($this->objmenupadre))
             ? (is_object($this->objmenupadre) ? $this->objmenupadre->getIdMenu() : intval($this->objmenupadre))
             : "NULL";
 
         $melink = !empty($this->melink) ? "'{$this->melink}'" : "NULL";
-        $deshab = !empty($this->medeshabilitado) ? "'{$this->medeshabilitado}'" : "NULL";
+
+        //ANTERIOR: $deshab = !empty($this->medeshabilitado) ? "'{$this->medeshabilitado}'" : "NULL";
+        $deshab = ($this->medeshabilitado === null || $this->medeshabilitado === "" || $this->medeshabilitado === "0000-00-00 00:00:00")
+            ? "NULL"
+            : "'{$this->medeshabilitado}''";
         $descripcion = $this->medescripcion ?? "";
 
         $sql = "INSERT INTO menu (menombre, melink, idpadre, medescripcion, medeshabilitado)
@@ -150,18 +173,31 @@ class Menu extends BaseDatos{
     }
 
 
-    public function modificar(){
-        $idpadre = "NULL";
-        if ($this->objmenupadre !== null && $this->objmenupadre instanceof Menu) {
-            $idpadre = $this->objmenupadre->getIdMenu();
-        }
+    public function modificar()
+{
+    // --- ID PADRE ---
+    $idpadre = "NULL";
+    if ($this->objmenupadre !== null && $this->objmenupadre instanceof Menu) {
+        $idpadre = $this->objmenupadre->getIdMenu();
+    }
 
-        $menombre = addslashes($this->menombre);
-        $melink = addslashes($this->melink);
-        $medescripcion = addslashes($this->medescripcion);
-        $medeshabilitado = empty($this->medeshabilitado) ? "NULL" : "'" . addslashes($this->medeshabilitado) . "'";
+    // --- CAMPOS ---
+    $menombre = addslashes($this->menombre);
+    $melink = addslashes($this->melink);
+    $medescripcion = addslashes($this->medescripcion);
 
-        $sql = "UPDATE menu SET
+    // --- LOGICA DE HABILITAR / DESHABILITAR ---
+    // Front envia: 1 = deshabilitar / 0 = habilitar
+    if ($this->medeshabilitado == 1) {
+        // DESHABILITAR → fecha actual
+        $medeshabilitado = "'" . date("Y-m-d H:i:s") . "'";
+    } else {
+        // HABILITAR → valor por defecto
+        $medeshabilitado = "'0000-00-00 00:00:00'";
+    }
+
+    // --- QUERY FINAL ---
+    $sql = "UPDATE menu SET
                 menombre = '$menombre',
                 melink = '$melink',
                 idpadre = $idpadre,
@@ -169,23 +205,25 @@ class Menu extends BaseDatos{
                 medeshabilitado = $medeshabilitado
             WHERE idmenu = {$this->idmenu}";
 
-        if ($this->Iniciar()) {
-            $res = $this->Ejecutar($sql);
-            if ($res === false) {
-                $this->mensajeoperacion = "menu->modificar: " . $this->getError();
-                error_log($this->mensajeoperacion);
-                return false;
-            }
-            return true;
-        } else {
-            $this->mensajeoperacion = "menu->modificar: no se pudo iniciar BD";
+    // --- EJECUCIÓN ---
+    if ($this->Iniciar()) {
+        $res = $this->Ejecutar($sql);
+        if ($res === false) {
+            $this->mensajeoperacion = "menu->modificar: " . $this->getError();
             error_log($this->mensajeoperacion);
             return false;
         }
+        return true;
+    } else {
+        $this->mensajeoperacion = "menu->modificar: no se pudo iniciar BD";
+        error_log($this->mensajeoperacion);
+        return false;
     }
+}
 
 
-    public function eliminar(){
+    public function eliminar()
+    {
         $sql = "DELETE FROM menu WHERE idmenu = {$this->idmenu}";
 
         if ($this->Iniciar()) {
@@ -195,7 +233,8 @@ class Menu extends BaseDatos{
         return false;
     }
 
-    public static function listar($param = ""){
+    public static function listar($param = "")
+    {
 
         $arreglo = [];
         $base = new BaseDatos();
@@ -234,4 +273,3 @@ class Menu extends BaseDatos{
         return $arreglo;
     }
 }
-?>
