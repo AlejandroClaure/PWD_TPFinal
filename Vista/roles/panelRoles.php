@@ -42,7 +42,7 @@ $listaUsuarios = $abmUsuario->buscar([]);
     <div class="card mb-4 shadow">
         <div class="card-header bg-primary text-white">Crear nuevo rol</div>
         <div class="card-body">
-            <form action="accion/crearRol.php" method="POST">
+            <form action="accion/accionCrearRol.php" method="POST">
                 <div class="input-group">
                     <input type="text" name="rodescripcion" class="form-control" placeholder="Nombre del rol" required>
                     <button class="btn btn-success">Crear</button>
@@ -73,7 +73,7 @@ $listaUsuarios = $abmUsuario->buscar([]);
                                     onclick="editarRol(<?= $rol->getIdRol(); ?>, '<?= htmlspecialchars($rol->getRoDescripcion()); ?>')">
                                     <i class="fa fa-edit"></i> Editar
                                 </button>
-                                <a href="accion/eliminarRol.php?idrol=<?= $rol->getIdRol(); ?>"
+                                <a href="accion/accionEliminarRol.php?idrol=<?= $rol->getIdRol(); ?>"
                                     class="btn btn-danger btn-sm"
                                     onclick="return confirm('¿Seguro que deseas eliminar este rol?')">
                                     <i class="fa fa-trash"></i> Eliminar
@@ -90,7 +90,7 @@ $listaUsuarios = $abmUsuario->buscar([]);
     <div class="card mb-5 shadow">
         <div class="card-header bg-secondary text-white">Asignar rol a usuario</div>
         <div class="card-body">
-            <form action="accion/asignarRol.php" method="POST" class="row g-3">
+            <form action="accion/accionAsignarRol.php" method="POST" class="row g-3">
                 <div class="col-md-5">
                     <label class="form-label">Usuario</label>
                     <select name="idusuario" class="form-select" required>
@@ -124,7 +124,7 @@ $listaUsuarios = $abmUsuario->buscar([]);
             <i class="fa fa-user-minus"></i> Quitar rol a usuario
         </div>
         <div class="card-body">
-            <form id="formQuitarRol" action="accion/quitarRol.php" method="POST" class="row g-3">
+            <form id="formQuitarRol" action="accion/accionQuitarRol.php" method="POST" class="row g-3">
                 <div class="col-md-5">
                     <label class="form-label fw-bold">Usuario</label>
                     <select id="selectUsuarioQuitar" name="idusuario" class="form-select" required>
@@ -158,7 +158,7 @@ $listaUsuarios = $abmUsuario->buscar([]);
 <div class="modal fade" id="modalEditarRol" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="accion/editarRol.php" method="POST">
+            <form action="accion/accionEditarRol.php" method="POST">
                 <div class="modal-header bg-warning">
                     <h5 class="modal-title">Editar Rol</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
