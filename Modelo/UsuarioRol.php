@@ -71,17 +71,27 @@ class UsuarioRol extends BaseDatos
     }
 
     public function insertar(){
+        $base = new BaseDatos();
         $resp = false;
-        $sql = "INSERT INTO usuariorol(idrol,idusuario)  VALUES(" . $this->getObjRol()->getIdRol() . "," . $this->getObjUsuario()->getIdUsuario() . ");";
-        if ($this->Iniciar()) {
-            if ($elid = $this->Ejecutar($sql)) {
-                // $this->setidrol($elid);
+
+        $idusuario = $this->getObjUsuario()->getIdUsuario();
+        $idrol = $this->getObjRol()->getIdRol();
+
+        $sql = "INSERT INTO usuariorol (idusuario, idrol)
+                VALUES ($idusuario, $idrol)";
+
+        error_log("SQL UsuarioRol insertar: " . $sql);
+
+        if ($base->Iniciar()) {
+            $res = $base->Ejecutar($sql);
+
+            // CORRECCIÓN Ejecutar() devuelve 0 → eso es false en PHP
+            if ($res !== false) {  
                 $resp = true;
             } else {
-                $this->setMensajeOperacion("Usuario->insertar: " . $this->getError());
+                $this->mensajeoperacion = $base->getError();
+                error_log("ERROR insertar UsuarioRol: " . $this->mensajeoperacion);
             }
-        } else {
-            $this->setMensajeOperacion("Usuario->insertar: " . $this->getError());
         }
         return $resp;
     }

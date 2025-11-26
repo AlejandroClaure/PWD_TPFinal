@@ -33,14 +33,27 @@ public function esAdmin($idusuario)
     return false;
 }
 
-    /**
-     * Asigna un rol a un usuario
-     */
-    public function asignarRol($idusuario, $idrol)
-    {
+    public function asignarRol($idusuario, $idrol){
+        // Buscar usuario correctamente
+        $objUsuario = new Usuario();
+        $usuario = $objUsuario->buscar(['idusuario' => $idusuario]);
+
+        // Buscar rol correctamente
+        $objRol = new Rol();
+        $rol = $objRol->buscar(['idrol' => $idrol]);
+
+        // Log debugging
+        error_log("Usuario encontrado para asignar rol: " . print_r($usuario, true));
+        error_log("Rol encontrado para asignar rol: " . print_r($rol, true));
+
+        if (empty($usuario) || empty($rol)) {
+            error_log("ERROR: Usuario o rol NO encontrado. No se asigna.");
+            return false;
+        }
+
         $obj = new UsuarioRol();
-        $obj->setObjUsuario((new Usuario())->buscar($idusuario)[0] ?? null);
-        $obj->setObjRol((new Rol())->buscar(['idrol' => $idrol])[0] ?? null);
+        $obj->setObjUsuario($usuario[0]);
+        $obj->setObjRol($rol[0]);
 
         return $obj->insertar();
     }

@@ -6,11 +6,13 @@
     <div class="auth-content">
       <div class="card shadow-lg border-0" style="width: 400px;">
         <div class="card-body text-center p-4">
-
+          <?php
+            $abrirRegistro = isset($_GET['email_duplicado']) ? true : false;
+          ?>
           <!-- Botón de cambio tipo toggle -->
           <div class="btn-group mb-4 w-100" role="group">
-            <button id="btn-login" class="btn btn-outline-primary active">Login</button>
-            <button id="btn-register" class="btn btn-outline-primary">Registrar</button>
+            <button id="btn-login" class="btn btn-outline-primary <?php echo !$abrirRegistro ? 'active' : ''; ?>">Login</button>
+            <button id="btn-register" class="btn btn-outline-primary <?php echo $abrirRegistro ? 'active' : ''; ?>">Registrar</button>
           </div>
 
           <h5 class="mb-4 text-muted" id="form-title">Iniciar sesión</h5>
@@ -61,6 +63,11 @@
             </div>
 
             <button type="submit" class="btn btn-primary w-100">Crear cuenta</button>
+            <?php if (isset($_GET["email_duplicado"])) { ?>
+            <div class="alert alert-warning py-1">
+                ⚠ El correo ya está registrado. Probá iniciar sesión.
+            </div>
+          <?php } ?>
           </form>
 
         </div>
@@ -93,7 +100,16 @@
       title.textContent = "Registrar nuevo usuario";
     });
   </script>
-
+  <script>
+  // Si viene email_duplicado, abrir automáticamente el registro
+    <?php if ($abrirRegistro) { ?>
+      btnRegister.classList.add("active");
+      btnLogin.classList.remove("active");
+      registerForm.classList.remove("d-none");
+      loginForm.classList.add("d-none");
+      title.textContent = "Registrar nuevo usuario";
+    <?php } ?>
+  </script>
   <style>
     .btn-group .btn.active {
       background-color: #0d6efd;

@@ -89,17 +89,25 @@ class BaseDatos extends PDO
         return $this->sql;
     }
 
-    public function Ejecutar($sql)
-    {
+    public function Ejecutar($sql){
         $this->setError("");
         $this->setSQL($sql);
 
-        if (stripos($sql, "insert") === 0) return $this->EjecutarInsert($sql);
-        if (stripos($sql, "update") === 0 || stripos($sql, "delete") === 0) return $this->EjecutarDeleteUpdate($sql);
-        if (stripos($sql, "select") === 0) return $this->EjecutarSelect($sql);
+        $sqlTrim = ltrim($sql);
+
+        if (preg_match('/^insert/i', $sqlTrim)) {
+            return $this->EjecutarInsert($sqlTrim);
+        }
+        if (preg_match('/^(update|delete)/i', $sqlTrim)) {
+            return $this->EjecutarDeleteUpdate($sqlTrim);
+        }
+        if (preg_match('/^select/i', $sqlTrim)) {
+            return $this->EjecutarSelect($sqlTrim);
+        }
 
         return -1;
     }
+
 
     private function EjecutarInsert($sql)
     {

@@ -1,12 +1,23 @@
 <?php
 require_once '../../../configuracion.php';
 
-$auth = new AbmAuth();
+error_log("Datos recibidos: " . print_r($_POST, true));
 
-if ($auth->registrarYLogin($_POST)) {
-    header("Location: " . $GLOBALS['BASE_URL'] . "Vista/login/login.php?ok=1");
+$auth = new AbmAuth();
+$resultado = $auth->registrarYLogin($_POST);
+
+if ($resultado === true) {
+    error_log("Entró a crear usuario");
+    header("Location: ../login.php?ok=1");
     exit;
 }
 
-header("Location: " . $GLOBALS['BASE_URL'] . "Vista/login/registro.php?error=1");
+if ($resultado === "email_duplicado") {
+    header("Location: ../login.php?email_duplicado=1");
+    exit;
+}
+
+// Error general
+error_log("Error al crear el usuario");
+header("Location: ../login.php?error=1");
 exit;
