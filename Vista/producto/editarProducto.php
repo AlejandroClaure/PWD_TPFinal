@@ -107,7 +107,7 @@ include_once "../estructura/cabecera.php";
         </button>
     </form>
 
-    <a href="listarMisProductos.php" class="btn btn-outline-secondary">Volver</a>
+    <a href="../menus/gestionMenus.php" class="btn btn-outline-secondary">Volver</a>
 </div>
 
 <?php include_once "../estructura/pie.php"; ?>
