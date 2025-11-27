@@ -578,21 +578,35 @@ PHP;
         return $exito;
     }
 
-
-
-
-
-    /* ============================================================
-       ===============  CONTROLADORES DE LOS ACCION ==============
+/* ============================================================
+       ===============  Correccion de accion ==========================
        ============================================================ */
+    
+    public function eliminarMenus($session){
 
-    /*
- * cambiar estado de compra
- *
- * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
- */
-    public function toggleVisibilidad($abm, $id)
-    {
+        if (!$session->activa() || !$session->tieneRol('admin')) {
+        header("Location: " . $GLOBALS['VISTA_URL'] . "login/login.php");
+        exit;
+        }
+
+        // === Obtener ID y validar ===
+        $idmenu = intval($_GET['idmenu'] ?? 0);
+        if ($idmenu <= 0) {
+            header("Location: ../gestionMenus.php?error=1");
+            exit;
+        }
+
+        // === Ejecutar eliminación completa (todo en el ABM) ===
+        $abmMenu = new AbmMenu();
+        $exito = $abmMenu->eliminarMenuCompleto($idmenu);
+
+        // === Redirigir con mensaje ===
+        header("Location: ../gestionMenus.php?" . ($exito ? "ok=1" : "error=2"));
+        exit;
+    }
+
+    public function toggleVisibilidad($abm,$id){
+
         $menuArr = $abm->buscar(["idmenu" => $id]);
 
         if (empty($menuArr)) {

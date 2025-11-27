@@ -230,41 +230,236 @@ class AbmProducto
 
 
     /*
- * cambiar estado de compra
+ * actualizar producto
  *
  * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
  */
     public function actualizarProducto($session)
     {
         // Verificamos sesión (doble chequeo, nunca está de más)
-        if (!$session->activa() || !$session->esAdmin()) 
-    exit(header("Location: " . $GLOBALS['VISTA_URL'] . "error/noAutorizado.php"));
+        if (!$session->activa() || !$session->esAdmin())
+            exit(header("Location: " . $GLOBALS['VISTA_URL'] . "error/noAutorizado.php"));
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') 
-    exit(header("Location: ../../producto/listarProductos.php"));
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST')
+            exit(header("Location: ../../producto/listarProductos.php"));
 
-$id = (int)($_POST['idproducto'] ?? 0);
-if ($id <= 0) 
-    exit(header("Location: ../editarProducto.php?id=$id&error=ID+inválido"));
+        $id = (int)($_POST['idproducto'] ?? 0);
+        if ($id <= 0)
+            exit(header("Location: ../editarProducto.php?id=$id&error=ID+inválido"));
 
-$datos = [
-    'idproducto'       => $id,
-    'pronombre'        => trim($_POST['pronombre'] ?? ''),
-    'prodetalle'       => trim($_POST['prodetalle'] ?? ''),
-    'proprecio'        => (float)($_POST['proprecio'] ?? 0),
-    'procantstock'     => (int)($_POST['procantstock'] ?? 0),
-    'prooferta'        => (int)($_POST['prooferta'] ?? 0),
-    'proimagen'        => $_POST['proimagen'] ?? null,
-    'idusuario'        => $session->getUsuario()->getIdUsuario(),
-    'prodeshabilitado' => !empty($_POST['deshabilitar']) ? date('Y-m-d H:i:s') : null
-];
+        $datos = [
+            'idproducto'       => $id,
+            'pronombre'        => trim($_POST['pronombre'] ?? ''),
+            'prodetalle'       => trim($_POST['prodetalle'] ?? ''),
+            'proprecio'        => (float)($_POST['proprecio'] ?? 0),
+            'procantstock'     => (int)($_POST['procantstock'] ?? 0),
+            'prooferta'        => (int)($_POST['prooferta'] ?? 0),
+            'proimagen'        => $_POST['proimagen'] ?? null,
+            'idusuario'        => $session->getUsuario()->getIdUsuario(),
+            'prodeshabilitado' => !empty($_POST['deshabilitar']) ? date('Y-m-d H:i:s') : null
+        ];
 
-// Validaciones (100% igual que antes)
-if (empty($datos['pronombre']) || $datos['proprecio'] <= 0 || $datos['procantstock'] < 0) {
-    exit(header("Location: ../editarProducto.php?id=$id&error=Datos+inválidos"));
-}
+        // Validaciones (100% igual que antes)
+        if (empty($datos['pronombre']) || $datos['proprecio'] <= 0 || $datos['procantstock'] < 0) {
+            exit(header("Location: ../editarProducto.php?id=$id&error=Datos+inválidos"));
+        }
 
-$exito = (new AbmProducto())->modificar($datos);
-exit(header("Location: ../editarProducto.php?id=$id" . ($exito ? "&msg=¡Actualizado!" : "&error=Error+al+guardar")));
+        $exito = (new AbmProducto())->modificar($datos);
+        exit(header("Location: ../editarProducto.php?id=$id" . ($exito ? "&msg=¡Actualizado!" : "&error=Error+al+guardar")));
+    }
+
+
+    /*
+ * actualizar producto
+ *
+ * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
+ */
+    public function crearProducto($session)
+    {
+        // Verificamos sesión (doble chequeo, nunca está de más)
+        if (!$session->activa()) {
+            header("Location: " . $GLOBALS['VISTA_URL'] . "login/login.php");
+            exit;
+        }
+        if (!$session->esAdmin()) {
+            header("Location: " . $GLOBALS['VISTA_URL'] . "error/noAutorizado.php");
+            exit;
+        }
+        $usuario = $session->getUsuario();
+
+        $datos = [
+            'pronombre'     => $_POST['pronombre'] ?? '',
+            'proprecio'     => $_POST['proprecio'] ?? 0,
+            'procantstock'  => $_POST['procantstock'] ?? 0,
+            'prodetalle'    => $_POST['prodetalle'] ?? '',
+            'categoria'     => $_POST['categoria'] ?? '',
+            'idusuario'     => $usuario->getIdUsuario(),
+            'proimagen'     => $_FILES['proimagen'] ?? null
+        ];
+
+        $abmProducto = new AbmProducto();
+
+        if ($abmProducto->crear($datos)) {
+            header("Location: ../../menus/gestionMenus.php?ok=1");
+        } else {
+            header("Location: ../../menus/gestionMenus.php?ok=0");
+        }
+        exit;
+    }
+
+
+    /*
+ * actualizar producto
+ *
+ * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
+ */
+    public function editarPrecioProducto($session)
+    {
+        // Verificamos sesión (doble chequeo, nunca está de más)
+        if (!$session->activa()) {
+            header("Location: " . $GLOBALS['VISTA_URL'] . "login/login.php");
+            exit;
+        }
+        if (!$session->esAdmin()) {
+            header("Location: " . $GLOBALS['VISTA_URL'] . "error/noAutorizado.php");
+            exit;
+        }
+        $usuario = $session->getUsuario();
+
+        $id = intval($_POST['idproducto'] ?? 0);
+        $precio = floatval($_POST['proprecio'] ?? 0);
+
+        if ($id <= 0 || $precio < 0) {
+            header("Location: ../../menus/gestionMenus.php?ok=0");
+            exit;
+        }
+
+        $abm = new AbmProducto();
+        $producto = $abm->buscarPorId($id);
+
+        $datos = [
+            'idproducto'   => $id,
+            'pronombre'    => $producto->getProNombre(),
+            'prodetalle'   => $producto->getProDetalle(),
+            'proprecio'    => $precio,
+            'procantstock' => $producto->getProCantStock(),
+            'idusuario'    => $producto->getIdUsuario(),
+            'proimagen'    => $producto->getProimagen()
+        ];
+
+        $exito = $abm->modificar($datos);
+        header("Location: ../../menus/gestionMenus.php?ok=" . ($exito ? 1 : 0));
+        exit;
+    }
+
+
+    /*
+ * actualizar producto
+ *
+ * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
+ */
+    public function editarStockProducto($session)
+    {
+        // Verificamos sesión (doble chequeo, nunca está de más)
+        if (!$session->activa()) {
+            header("Location: " . $GLOBALS['VISTA_URL'] . "login/login.php");
+            exit;
+        }
+        if (!$session->esAdmin()) {
+            header("Location: " . $GLOBALS['VISTA_URL'] . "error/noAutorizado.php");
+            exit;
+        }
+        $usuario = $session->getUsuario();
+
+        $id = intval($_POST['idproducto'] ?? 0);
+        $stock = intval($_POST['procantstock'] ?? 0);
+
+        if ($id <= 0 || $stock < 0) {
+            header("Location: ../../menus/gestionMenus.php?ok=0");
+            exit;
+        }
+
+        $abm = new AbmProducto();
+        $producto = $abm->buscarPorId($id);
+
+        $datos = [
+            'idproducto'   => $id,
+            'pronombre'    => $producto->getProNombre(),
+            'prodetalle'   => $producto->getProDetalle(),
+            'proprecio'    => $producto->getProPrecio(),
+            'procantstock' => $stock,
+            'idusuario'    => $producto->getIdUsuario(),
+            'proimagen'    => $producto->getProimagen()
+        ];
+
+        $exito = $abm->modificar($datos);
+        header("Location: ../../menus/gestionMenus.php?ok=" . ($exito ? 1 : 0));
+        exit;
+    }
+
+
+    /*
+ * actualizar producto
+ *
+ * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
+ */
+    public function eliminarProducto($session)
+    {
+        // Verificamos sesión (doble chequeo, nunca está de más)
+        if (!$session->activa() || !$session->esAdmin()) exit;
+
+        $id = $_POST['idproducto'] ?? 0;
+        if ($id > 0) {
+            $abm = new AbmProducto();
+            if ($abm->eliminar($id)) {
+                header("Location: ../../producto/listarProductos.php?msg=Producto deshabilitado");
+            } else {
+                header("Location: ../../producto/listarProductos.php?error=No se pudo deshabilitar");
+            }
+        } else {
+            header("Location: ../../producto/listarProductos.php");
+        }
+        exit;
+    }
+
+
+    /*
+ * cambia la visibilidad del propducto
+ *
+ * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
+ */
+    public function toggleVisibilidadProducto($session)
+    {
+        // Verificamos sesión (doble chequeo, nunca está de más)
+        if (!$session->activa()) {
+            header("Location: " . $GLOBALS['VISTA_URL'] . "login/login.php");
+            exit;
+        }
+        if (!$session->esAdmin()) {
+            header("Location: " . $GLOBALS['VISTA_URL'] . "error/noAutorizado.php");
+            exit;
+        }
+        $usuario = $session->getUsuario();
+
+        $id = intval($_GET['id'] ?? 0);
+        if ($id <= 0) {
+            header("Location: ../../menus/gestionMenus.php?ok=0");
+            exit;
+        }
+
+        $abm = new AbmProducto();
+        $producto = $abm->buscarPorId($id);
+
+        if (!$producto) {
+            header("Location: ../../menus/gestionMenus.php?ok=0");
+            exit;
+        }
+
+        $exito = $producto->getProDeshabilitado()
+            ? $abm->habilitar($id)
+            : $abm->eliminar($id);
+
+        header("Location: ../../menus/gestionMenus.php?toggle=1");
+        exit;
     }
 }

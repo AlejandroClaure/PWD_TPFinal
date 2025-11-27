@@ -10,4 +10,5 @@ if (!$id) {
 }
 
 $abm = new AbmMenu();
-$abm -> toggleVisibilidad($abm, $id);
+$abm->toggleVisibilidad($abm,$id);
+

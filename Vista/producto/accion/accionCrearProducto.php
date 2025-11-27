@@ -4,31 +4,6 @@ include_once dirname(__DIR__, 3) . '/Control/AbmProducto.php';
 include_once dirname(__DIR__, 3) . '/Control/Session.php';
 
 $session = new Session();
-if (!$session->activa()) {
-    header("Location: " . $GLOBALS['VISTA_URL'] . "login/login.php");
-    exit;
-}
-if (!$session->esAdmin()) {
-    header("Location: " . $GLOBALS['VISTA_URL'] . "error/noAutorizado.php");
-    exit;
-}
-$usuario = $session->getUsuario();
+$abm = new AbmProducto();
+$abm-> crearProducto($session);
 
-$datos = [
-    'pronombre'     => $_POST['pronombre'] ?? '',
-    'proprecio'     => $_POST['proprecio'] ?? 0,
-    'procantstock'  => $_POST['procantstock'] ?? 0,
-    'prodetalle'    => $_POST['prodetalle'] ?? '',
-    'categoria'     => $_POST['categoria'] ?? '',
-    'idusuario'     => $usuario->getIdUsuario(),
-    'proimagen'     => $_FILES['proimagen'] ?? null
-];
-
-$abmProducto = new AbmProducto();
-
-if ($abmProducto->crear($datos)) {
-    header("Location: ../../menus/gestionMenus.php?ok=1");
-} else {
-    header("Location: ../../menus/gestionMenus.php?ok=0");
-}
-exit;
