@@ -135,4 +135,49 @@ class AbmUsuario
         $obj = new Usuario();
         return $obj->listar($where);
     }
+
+
+    /*
+ * cambia la visibilidad del propducto
+ *
+ * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
+ */
+    public function crearUsuario()
+    {
+        $abm = new AbmUsuario();
+        $param = [
+            "usnombre" => $_POST["usnombre"],
+            "usmail"   => $_POST["usmail"],
+            "uspass"   => $_POST["uspass"]
+        ];
+
+        $abm->alta($param);
+
+        // Redirige al panel
+        header("Location: ../panelUsuarios.php?ok=1");
+        exit;
+    }
+
+
+    /*
+ * cambia la visibilidad del propducto
+ *
+ * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
+ */
+    public function EditarUsuario($abm)
+    {
+        $abm = new AbmUsuario();
+
+        $param = [
+            "idusuario" => $_POST["idusuario"],
+            "usnombre" => $_POST["usnombre"],
+            "usmail"   => $_POST["usmail"]
+        ];
+
+        // Modifica SIN tocar contraseña
+        $abm->modificacion($param);
+
+        header("Location: ../panelUsuarios.php?edit=1");
+        exit;
+    }
 }
