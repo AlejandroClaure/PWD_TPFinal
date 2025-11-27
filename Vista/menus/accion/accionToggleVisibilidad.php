@@ -8,7 +8,6 @@ if (!$id) {
     header("Location: ../gestionMenus.php?ok=0");
     exit;
 }
-
 $abm = new AbmMenu();
 $abm->toggleVisibilidad($abm,$id);
 

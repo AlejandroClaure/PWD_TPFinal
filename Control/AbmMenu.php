@@ -217,41 +217,41 @@ class AbmMenu
        ===============  BUSCAR ====================================
        ============================================================ */
     public function buscar($param)
-{
-    // Si viene un WHERE manual en forma de string → devolver directo
-    if (is_string($param)) {
-        return Menu::listar($param);
-    }
-
-    $where = "true";
-
-    if (isset($param["idmenu"])) {
-        $where .= " AND idmenu=" . intval($param["idmenu"]);
-    }
-
-    if (isset($param["idpadre"])) {
-        $where .= " AND idpadre=" . intval($param["idpadre"]);
-    }
-
-    if (isset($param["menombre"])) {
-        $where .= " AND menombre LIKE '%" . addslashes($param["menombre"]) . "%'";
-    }
-
-    // 🔥 Filtro correcto para DATETIME
-    if (isset($param["medeshabilitado"])) {
-        $valor = addslashes($param["medeshabilitado"]);
-        
-        // Si el valor es NULL
-        if ($valor === null || strtoupper($valor) === "NULL") {
-            $where .= " AND medeshabilitado IS NULL";
-        } else {
-            // Usamos fecha exacta
-            $where .= " AND medeshabilitado = '$valor'";
+    {
+        // Si viene un WHERE manual en forma de string → devolver directo
+        if (is_string($param)) {
+            return Menu::listar($param);
         }
-    }
 
-    return Menu::listar($where);
-}
+        $where = "true";
+
+        if (isset($param["idmenu"])) {
+            $where .= " AND idmenu=" . intval($param["idmenu"]);
+        }
+
+        if (isset($param["idpadre"])) {
+            $where .= " AND idpadre=" . intval($param["idpadre"]);
+        }
+
+        if (isset($param["menombre"])) {
+            $where .= " AND menombre LIKE '%" . addslashes($param["menombre"]) . "%'";
+        }
+
+        // 🔥 Filtro correcto para DATETIME
+        if (isset($param["medeshabilitado"])) {
+            $valor = addslashes($param["medeshabilitado"]);
+
+            // Si el valor es NULL
+            if ($valor === null || strtoupper($valor) === "NULL") {
+                $where .= " AND medeshabilitado IS NULL";
+            } else {
+                // Usamos fecha exacta
+                $where .= " AND medeshabilitado = '$valor'";
+            }
+        }
+
+        return Menu::listar($where);
+    }
 
 
     private function seteadosCamposClaves($params)
@@ -524,59 +524,59 @@ PHP;
 
     // dentro de class AbmMenu { ... }
 
-public function modificar(array $params)
-{
-    // Necesitamos idmenu
-    if (empty($params['idmenu'])) return false;
-    $id = intval($params['idmenu']);
+    public function modificar(array $params)
+    {
+        // Necesitamos idmenu
+        if (empty($params['idmenu'])) return false;
+        $id = intval($params['idmenu']);
 
-    // Cargar objeto menu
-    $menu = new Menu();
-    $menu->setIdMenu($id);
-    if (!$menu->cargar()) {
-        return false;
-    }
-
-    // Actualizar campos permitidos (si vienen)
-    if (isset($params['menombre'])) {
-        $menu->setMeNombre(trim($params['menombre']));
-    }
-    if (array_key_exists('medescripcion', $params)) {
-        $menu->setMeDescripcion($params['medescripcion']);
-    }
-    if (array_key_exists('medeshabilitado', $params)) {
-        // Permitimos 0/null/1
-        $val = $params['medeshabilitado'];
-        // Normalizar: si viene '' o null -> null, si viene 1 o '1' -> 1, else 0
-        if ($val === '' || $val === null) {
-            $menu->setMeDeshabilitado(null);
-        } else {
-            $menu->setMeDeshabilitado(intval($val) === 1 ? 1 : 0);
+        // Cargar objeto menu
+        $menu = new Menu();
+        $menu->setIdMenu($id);
+        if (!$menu->cargar()) {
+            return false;
         }
-    }
 
-    // idpadre: si viene, actualizar objeto padre (o setear null)
-    if (array_key_exists('idpadre', $params)) {
-        $idpadre = $params['idpadre'] === null || $params['idpadre'] === '' ? null : intval($params['idpadre']);
-        if ($idpadre && $idpadre !== $menu->getIdMenu()) {
-            $padreArr = $this->buscar(['idmenu' => $idpadre]);
-            if (!empty($padreArr)) {
-                $menu->setObjMenuPadre($padreArr[0]);
+        // Actualizar campos permitidos (si vienen)
+        if (isset($params['menombre'])) {
+            $menu->setMeNombre(trim($params['menombre']));
+        }
+        if (array_key_exists('medescripcion', $params)) {
+            $menu->setMeDescripcion($params['medescripcion']);
+        }
+        if (array_key_exists('medeshabilitado', $params)) {
+            // Permitimos 0/null/1
+            $val = $params['medeshabilitado'];
+            // Normalizar: si viene '' o null -> null, si viene 1 o '1' -> 1, else 0
+            if ($val === '' || $val === null) {
+                $menu->setMeDeshabilitado(null);
+            } else {
+                $menu->setMeDeshabilitado(intval($val) === 1 ? 1 : 0);
+            }
+        }
+
+        // idpadre: si viene, actualizar objeto padre (o setear null)
+        if (array_key_exists('idpadre', $params)) {
+            $idpadre = $params['idpadre'] === null || $params['idpadre'] === '' ? null : intval($params['idpadre']);
+            if ($idpadre && $idpadre !== $menu->getIdMenu()) {
+                $padreArr = $this->buscar(['idmenu' => $idpadre]);
+                if (!empty($padreArr)) {
+                    $menu->setObjMenuPadre($padreArr[0]);
+                } else {
+                    $menu->setObjMenuPadre(null);
+                }
             } else {
                 $menu->setObjMenuPadre(null);
             }
-        } else {
-            $menu->setObjMenuPadre(null);
         }
-    }
 
-    // Guardar cambios
-    $exito = $menu->modificar();
-    if (!$exito) {
-        error_log("AbmMenu::modificar fallo: " . $menu->getMensajeOperacion());
+        // Guardar cambios
+        $exito = $menu->modificar();
+        if (!$exito) {
+            error_log("AbmMenu::modificar fallo: " . $menu->getMensajeOperacion());
+        }
+        return $exito;
     }
-    return $exito;
-}
 
 /* ============================================================
        ===============  Correccion de accion ==========================

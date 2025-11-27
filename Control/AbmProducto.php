@@ -6,105 +6,106 @@ class AbmProducto
     // ======================================================
     // CREAR
     // ======================================================
-   public function crear($datos)
-{
-    try {
-        // Recibir y sanitizar datos
-        $pronombre    = ($datos['pronombre'] ?? '');
-        $proprecio    = floatval($datos['proprecio'] ?? 0);
-        $procantstock = intval($datos['procantstock'] ?? 0);
-        $prodetalle   = trim($datos['prodetalle'] ?? '');
-        $idmenu       = intval($datos['categoria'] ?? 0);
-        $idusuario    = intval($datos['idusuario'] ?? 0);
-        $archivoImg   = $datos['proimagen'] ?? null;
+    public function crear($datos)
+    {
+        try {
+            // Recibir y sanitizar datos
+            $pronombre    = ($datos['pronombre'] ?? '');
+            $proprecio    = floatval($datos['proprecio'] ?? 0);
+            $procantstock = intval($datos['procantstock'] ?? 0);
+            $prodetalle   = trim($datos['prodetalle'] ?? '');
+            $idmenu       = intval($datos['categoria'] ?? 0);
+            $idusuario    = intval($datos['idusuario'] ?? 0);
+            $archivoImg   = $datos['proimagen'] ?? null;
 
-        // Validaciones básicas
-        if ($pronombre === '' || $idmenu <= 0 || $idusuario <= 0 || 
-            $proprecio < 0 || $procantstock < 0) {
-            throw new Exception("Datos obligatorios faltantes o inválidos.");
-        }
-
-        // Obtener cadena de categorías
-        $abmMenu = new AbmMenu();
-        $menus = $abmMenu->buscar(['idmenu' => $idmenu]);
-
-        if (empty($menus)) {
-            throw new Exception("Categoría no encontrada (idmenu: $idmenu)");
-        }
-
-        $menu = $menus[0];
-        $categorias = [];
-        $actual = $menu;
-
-        while ($actual !== null) {
-            $categorias[] = strtolower(trim($actual->getMeNombre()));
-            $actual = $actual->getObjMenuPadre();
-        }
-
-        $categorias = array_reverse($categorias);
-        $prefijo = implode('_', $categorias) . '_';
-
-        $nombreFinal = $prefijo . $pronombre;
-
-        // Subir imagen
-        $imagenNombre = null;
-        if ($archivoImg && $archivoImg['error'] === UPLOAD_ERR_OK && $archivoImg['size'] > 0) {
-
-            $ext = strtolower(pathinfo($archivoImg['name'], PATHINFO_EXTENSION));
-            $extensionesPermitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-
-            if (!in_array($ext, $extensionesPermitidas)) {
-                throw new Exception("Solo se permiten imágenes JPG, PNG, GIF o WEBP.");
+            // Validaciones básicas
+            if (
+                $pronombre === '' || $idmenu <= 0 || $idusuario <= 0 ||
+                $proprecio < 0 || $procantstock < 0
+            ) {
+                throw new Exception("Datos obligatorios faltantes o inválidos.");
             }
 
-            $imagenNombre = $this->limpiarNombre($pronombre) . "_" . time() . ".$ext";
-            $carpeta = $_SERVER['DOCUMENT_ROOT'] . "/PWD_TPFinal/Vista/imagenes/productos/";
+            // Obtener cadena de categorías
+            $abmMenu = new AbmMenu();
+            $menus = $abmMenu->buscar(['idmenu' => $idmenu]);
 
-            if (!is_dir($carpeta) && !mkdir($carpeta, 0755, true)) {
-                throw new Exception("No se pudo crear la carpeta de imágenes.");
+            if (empty($menus)) {
+                throw new Exception("Categoría no encontrada (idmenu: $idmenu)");
             }
 
-            $rutaFinal = $carpeta . $imagenNombre;
+            $menu = $menus[0];
+            $categorias = [];
+            $actual = $menu;
 
-            if (!move_uploaded_file($archivoImg['tmp_name'], $rutaFinal)) {
-                throw new Exception("Error al subir la imagen.");
+            while ($actual !== null) {
+                $categorias[] = strtolower(trim($actual->getMeNombre()));
+                $actual = $actual->getObjMenuPadre();
             }
+
+            $categorias = array_reverse($categorias);
+            $prefijo = implode('_', $categorias) . '_';
+
+            $nombreFinal = $prefijo . $pronombre;
+
+            // Subir imagen
+            $imagenNombre = null;
+            if ($archivoImg && $archivoImg['error'] === UPLOAD_ERR_OK && $archivoImg['size'] > 0) {
+
+                $ext = strtolower(pathinfo($archivoImg['name'], PATHINFO_EXTENSION));
+                $extensionesPermitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+                if (!in_array($ext, $extensionesPermitidas)) {
+                    throw new Exception("Solo se permiten imágenes JPG, PNG, GIF o WEBP.");
+                }
+
+                $imagenNombre = $this->limpiarNombre($pronombre) . "_" . time() . ".$ext";
+                $carpeta = $_SERVER['DOCUMENT_ROOT'] . "/PWD_TPFinal/Vista/imagenes/productos/";
+
+                if (!is_dir($carpeta) && !mkdir($carpeta, 0755, true)) {
+                    throw new Exception("No se pudo crear la carpeta de imágenes.");
+                }
+
+                $rutaFinal = $carpeta . $imagenNombre;
+
+                if (!move_uploaded_file($archivoImg['tmp_name'], $rutaFinal)) {
+                    throw new Exception("Error al subir la imagen.");
+                }
+            }
+
+            // Crear producto
+            $obj = new Producto();
+            $obj->setear(
+                0,
+                $nombreFinal,
+                $prodetalle,
+                $proprecio,
+                $procantstock,
+                0,
+                null,
+                null,
+                $idusuario,
+                $imagenNombre
+            );
+
+            if (!$obj->insertar()) {
+
+                if ($imagenNombre && isset($rutaFinal) && file_exists($rutaFinal)) {
+                    unlink($rutaFinal);
+                }
+
+                throw new Exception("Error al insertar producto en la base de datos.");
+            }
+
+            return true;
+        } catch (Exception $e) {
+            // Esto reemplaza setMensajeOperacion
+            return [
+                "ok" => false,
+                "error" => $e->getMessage()
+            ];
         }
-
-        // Crear producto
-        $obj = new Producto();
-        $obj->setear(
-            0,
-            $nombreFinal,
-            $prodetalle,
-            $proprecio,
-            $procantstock,
-            0,
-            null,
-            null,
-            $idusuario,
-            $imagenNombre
-        );
-
-        if (!$obj->insertar()) {
-
-            if ($imagenNombre && isset($rutaFinal) && file_exists($rutaFinal)) {
-                unlink($rutaFinal);
-            }
-
-            throw new Exception("Error al insertar producto en la base de datos.");
-        }
-
-        return true;
-
-    } catch (Exception $e) {
-        // Esto reemplaza setMensajeOperacion
-        return [
-            "ok" => false,
-            "error" => $e->getMessage()
-        ];
     }
-}
 
 
     // Función auxiliar para limpiar nombres (para archivo y nombre de producto)
@@ -221,5 +222,49 @@ class AbmProducto
             }
         }
         return $filtrados;
+    }
+
+    // ======================================================
+    // CONTROLADORES PARA LOS ACCION
+    // ======================================================
+
+
+    /*
+ * cambiar estado de compra
+ *
+ * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
+ */
+    public function actualizarProducto($session)
+    {
+        // Verificamos sesión (doble chequeo, nunca está de más)
+        if (!$session->activa() || !$session->esAdmin()) 
+    exit(header("Location: " . $GLOBALS['VISTA_URL'] . "error/noAutorizado.php"));
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') 
+    exit(header("Location: ../../producto/listarProductos.php"));
+
+$id = (int)($_POST['idproducto'] ?? 0);
+if ($id <= 0) 
+    exit(header("Location: ../editarProducto.php?id=$id&error=ID+inválido"));
+
+$datos = [
+    'idproducto'       => $id,
+    'pronombre'        => trim($_POST['pronombre'] ?? ''),
+    'prodetalle'       => trim($_POST['prodetalle'] ?? ''),
+    'proprecio'        => (float)($_POST['proprecio'] ?? 0),
+    'procantstock'     => (int)($_POST['procantstock'] ?? 0),
+    'prooferta'        => (int)($_POST['prooferta'] ?? 0),
+    'proimagen'        => $_POST['proimagen'] ?? null,
+    'idusuario'        => $session->getUsuario()->getIdUsuario(),
+    'prodeshabilitado' => !empty($_POST['deshabilitar']) ? date('Y-m-d H:i:s') : null
+];
+
+// Validaciones (100% igual que antes)
+if (empty($datos['pronombre']) || $datos['proprecio'] <= 0 || $datos['procantstock'] < 0) {
+    exit(header("Location: ../editarProducto.php?id=$id&error=Datos+inválidos"));
+}
+
+$exito = (new AbmProducto())->modificar($datos);
+exit(header("Location: ../editarProducto.php?id=$id" . ($exito ? "&msg=¡Actualizado!" : "&error=Error+al+guardar")));
     }
 }

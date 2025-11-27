@@ -1,29 +1,7 @@
 <?php
-// acciones/carrito/accionSumarStockCarrito.php
-include_once dirname(__DIR__, 3) . '/configuracion.php';
+include_once dirname(__DIR__,3) . '/configuracion.php';
 include_once $GLOBALS['CONTROL_PATH'] . 'Session.php';
-include_once $GLOBALS['CONTROL_PATH'] . 'AbmCompraItem.php';
-
-session_start();
-
+include_once $GLOBALS['CONTROL_PATH'] . 'AbmCompra.php';
 $session = new Session();
-if (!$session->activa()) {
-    header("Location: " . $GLOBALS['VISTA_URL'] . "login/login.php?error=2");
-    exit;
-}
-
-$usuario = $session->getUsuario();
-$usuarioId = $usuario->getIdUsuario();
-
-$idProducto = intval($_GET['id'] ?? 0);
-if ($idProducto <= 0) {
-    header("Location: " . $GLOBALS['VISTA_URL'] . "compra/carrito.php?error=1");
-    exit;
-}
-
-$abm = new AbmCompraItem();
-$abm->modificarCantidad($usuarioId, $idProducto, 'sumar');
-
-$redirect = $_GET['redirect'] ?? 'compra/carrito.php';
-header("Location: " . $GLOBALS['VISTA_URL'] . $redirect);
-exit;
+$abmCompra = new AbmCompra();
+$abmCompra->sumarStockCarrito($session); // Le pasamos la sesión y listo
