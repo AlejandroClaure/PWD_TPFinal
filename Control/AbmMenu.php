@@ -578,4 +578,63 @@ public function modificar(array $params)
     return $exito;
 }
 
+/* ============================================================
+       ===============  Correccion de accion ==========================
+       ============================================================ */
+    
+    public function eliminarMenus($session){
+
+        if (!$session->activa() || !$session->tieneRol('admin')) {
+        header("Location: " . $GLOBALS['VISTA_URL'] . "login/login.php");
+        exit;
+        }
+
+        // === Obtener ID y validar ===
+        $idmenu = intval($_GET['idmenu'] ?? 0);
+        if ($idmenu <= 0) {
+            header("Location: ../gestionMenus.php?error=1");
+            exit;
+        }
+
+        // === Ejecutar eliminación completa (todo en el ABM) ===
+        $abmMenu = new AbmMenu();
+        $exito = $abmMenu->eliminarMenuCompleto($idmenu);
+
+        // === Redirigir con mensaje ===
+        header("Location: ../gestionMenus.php?" . ($exito ? "ok=1" : "error=2"));
+        exit;
+    }
+
+    public function toggleVisibilidad($abm,$id){
+
+        $menuArr = $abm->buscar(["idmenu" => $id]);
+
+        if (empty($menuArr)) {
+            header("Location: ../gestionMenus.php?ok=0");
+            exit;
+        }
+
+        $menu = $menuArr[0];
+
+        // Detectar correctamente si está deshabilitado
+        $estaDeshabilitado = ($menu->getMeDeshabilitado() !== "0000-00-00 00:00:00");
+
+        // Toggle
+        $nuevoEstado = $estaDeshabilitado ? 0 : 1;
+
+        // Datos completos para modificar
+        $datos = [
+            "idmenu"        => $menu->getIdMenu(),
+            "menombre"      => $menu->getMeNombre(),
+            "melink"        => $menu->getMeLink(),
+            "medescripcion" => $menu->getMeDescripcion(),
+            "idpadre"       => $menu->getObjMenuPadre() ? $menu->getObjMenuPadre()->getIdMenu() : null,
+            "medeshabilitado" => $nuevoEstado
+        ];
+
+        $abm->modificar($datos);
+
+        header("Location: ../gestionMenus.php?toggle=1");
+        exit;
+    }
 }
