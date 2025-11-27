@@ -591,7 +591,7 @@ PHP;
  *
  * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
  */
-    public function cambioEstadoCompra($abm, $id)
+    public function toggleVisibilidad($abm, $id)
     {
         $menuArr = $abm->buscar(["idmenu" => $id]);
 
