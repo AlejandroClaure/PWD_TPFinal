@@ -154,4 +154,42 @@ class AbmUsuarioRol
 
         return ["ok" => true, "msg" => "Rol quitado correctamente."];
     }
+
+
+    /**
+     * Modificaiones de accion
+     */
+
+    public function accionQuitarRol($abmUR,$usuario){
+
+        $result = $abmUR->quitarRolSeguro(
+        $usuario->getIdUsuario(),      // el que ejecuta
+        $_POST['idusuario'] ?? null,   // usuario objetivo
+        $_POST['idrol'] ?? null        // rol a quitar
+        );
+
+        $_SESSION['mensaje'] = $result['msg'];
+
+        header("Location: ../panelRoles.php");
+        exit;
+        }
+
+    public function accionRolesDelUsuario($idusuario ){
+
+        if (!$idusuario || !is_numeric($idusuario)) {
+            echo json_encode([]);
+            exit;
+        }
+
+        try {
+            $abmUR = new AbmUsuarioRol();
+            $roles = $abmUR->rolesDeUsuarioConID($idusuario);
+            echo json_encode($roles, JSON_UNESCAPED_UNICODE);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error en el servidor']);
+        }
+
+        exit;
+            }
 }

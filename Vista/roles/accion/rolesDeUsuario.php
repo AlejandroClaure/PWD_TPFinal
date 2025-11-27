@@ -9,19 +9,5 @@ $rootPath = dirname(__DIR__, 3);
 require_once $rootPath . '/configuracion.php';
 
 $idusuario = $_GET['idusuario'] ?? null;
-
-if (!$idusuario || !is_numeric($idusuario)) {
-    echo json_encode([]);
-    exit;
-}
-
-try {
-    $abmUR = new AbmUsuarioRol();
-    $roles = $abmUR->rolesDeUsuarioConID($idusuario);
-    echo json_encode($roles, JSON_UNESCAPED_UNICODE);
-} catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Error en el servidor']);
-}
-
-exit;
+$abmUR = new AbmUsuarioRol();
+$abmUR->accionRolesDelUsuario($idusuario);

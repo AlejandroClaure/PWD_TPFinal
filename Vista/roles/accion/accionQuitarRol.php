@@ -6,13 +6,5 @@ $usuario = $session->getUsuario();
 
 $abmUR = new AbmUsuarioRol();
 
-$result = $abmUR->quitarRolSeguro(
-    $usuario->getIdUsuario(),      // el que ejecuta
-    $_POST['idusuario'] ?? null,   // usuario objetivo
-    $_POST['idrol'] ?? null        // rol a quitar
-);
+$abmUR->accionQuitarRol($abmUR,$usuario);
 
-$_SESSION['mensaje'] = $result['msg'];
-
-header("Location: ../panelRoles.php");
-exit;
