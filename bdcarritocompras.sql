@@ -252,7 +252,8 @@ CREATE TABLE `usuario` (
 INSERT INTO `usuario` (`idusuario`, `usnombre`, `uspass`, `usmail`, `usdeshabilitado`) VALUES
 (4, 'ale.c', '$2y$10$ASSBVgrb9t7YGQifGPpuM.dCo/DchUPveYjg/DocsNg7/rv0rVXDm', 'alejandro.claure@est.fi.uncoma.edu.ar', NULL),
 (21, 'cliente', '$2y$10$FZP0Q4SOyfwQ3P8obrgWp.4JIt7kDNl5plDMArYZUHdT4DyJzB9Ki', 'cliente@gmail.com', NULL),
-(23, 'cliente3', '$2y$10$hcPxfjN6QMgY28x9NHODQuXdjygpdcMlKkz6jvBW13ZCRMmHzZSna', 'cliente3@gmail.com', NULL);
+(23, 'pepi', '$2y$10$jL9tYrY1qstziNVv4FJ/Y.M2Ylpt3dyR14VUJQ2hfcg/DLuGdXse6', 'pepi@gmail.com', NULL),
+(26, 'pepi', '$2y$10$HWOpdrXIdPDfqgMXsLnAS.FXWI7omWHw2oXbqrUDB7rd0uax1kT3W', 'adm@gmail.com', NULL);
 
 -- --------------------------------------------------------
 
@@ -274,7 +275,9 @@ INSERT INTO `usuariorol` (`idusuario`, `idrol`) VALUES
 (4, 2),
 (4, 3),
 (21, 2),
-(23, 2);
+(21, 1),
+(23, 2),
+(26, 1);
 
 --
 -- Índices para tablas volcadas
