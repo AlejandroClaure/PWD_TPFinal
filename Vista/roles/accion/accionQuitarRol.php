@@ -6,5 +6,14 @@ $usuario = $session->getUsuario();
 
 $abmUR = new AbmUsuarioRol();
 
-$abmUR->accionQuitarRol($abmUR,$usuario);
+$resultado = $abmUR->accionQuitarRol($abmUR,$usuario);
 
+// Si hay error específico
+if (!$resultado['estado']) {
+    header("Location: ../panelRoles.php?error=1");
+    exit;
+}
+
+// Si todo salió bien
+header("Location: ../panelRoles.php?ok=1");
+exit;

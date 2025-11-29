@@ -9,7 +9,7 @@ include_once $GLOBALS['CONTROL_PATH'] . 'Session.php';
 
 $session = new Session();
 $abmMenu = new AbmMenu();
-$resultado = $abmMenu->eliminarMenus($session);
+$resultado = $abmMenu->accionEliminarMenus($session);
 // Decido la redirección según resultado
 if (!$resultado['estado']) {
 
