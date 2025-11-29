@@ -14,5 +14,5 @@ $nuevoEstado = (int)($_POST['nuevoestado'] ?? 0);
 $abm = new AbmCompra();
 $abm->cambiarEstadoCompra($idCompra, $nuevoEstado);
 
-header("Location: {$GLOBALS['VISTA_URL']}verCompraAdmin.php?id={$idCompra}");
+header("Location: {$GLOBALS['VISTA_URL']}compra/verCompraAdmin.php?id={$idCompra}");
 exit;

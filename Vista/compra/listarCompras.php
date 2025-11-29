@@ -13,7 +13,21 @@ if (!$session->activa() || !$session->tieneRol('admin')) {
 $abmCompra = new AbmCompra();
 $abmEstado = new AbmCompraEstado();
 
-$todasLasCompras = $abmCompra->buscar([]); // todas las compras
+// 1. Obtenemos TODAS las compras
+$todasLasCompras = $abmCompra->buscar([]);
+
+// 2. Detectamos cuál es la compra más antigua (menor ID) de cada usuario → esa es el carrito
+$carritoPorUsuario = []; // [idusuario => idcompra del carrito]
+
+foreach ($todasLasCompras as $compra) {
+    $idUsuario = $compra->getObjUsuario()->getIdUsuario();
+    $idCompra  = $compra->getIdCompra();
+
+    // Si no tengo ninguna registrada aún o esta es más antigua que la que tenía
+    if (!isset($carritoPorUsuario[$idUsuario]) || $idCompra < $carritoPorUsuario[$idUsuario]) {
+        $carritoPorUsuario[$idUsuario] = $idCompra;
+    }
+}
 
 include_once '../estructura/cabecera.php';
 ?>
@@ -22,13 +36,13 @@ include_once '../estructura/cabecera.php';
     <h2>Gestión de Compras</h2>
 
     <?php if (empty($todasLasCompras)): ?>
-        <p class="text-muted">No hay compras registradas.</p>
+        <div class="alert alert-info">No hay compras registradas.</div>
     <?php else: ?>
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead class="table-dark">
                     <tr>
-                        <th>ID</th>
+                        <th>ID Compra</th>
                         <th>Cliente</th>
                         <th>Fecha</th>
                         <th>Estado Actual</th>
@@ -38,52 +52,52 @@ include_once '../estructura/cabecera.php';
                 </thead>
                 <tbody>
                     <?php foreach ($todasLasCompras as $compra):
+                        $idCompra  = $compra->getIdCompra();
                         $idUsuario = $compra->getObjUsuario()->getIdUsuario();
 
-                        // Detectar si es la primera compra de este usuario
-                        if (!isset($primerasCompras[$idUsuario])) {
-
-                            $primerasCompras[$idUsuario] = true; // marcar que ya vimos su primera compra
-
-                            // Obtener el estado real
-                            $estado = $abmEstado->obtenerEstadoActual($compra->getIdCompra());
-                            $tipoEstado = $estado ? $estado->getObjCompraEstadoTipo()->getCeTDescripcion() : 'desconocido';
-
-                            // 👉 SI está "iniciada", OCULTARLA y seguir con la siguiente
-                            if ($tipoEstado === 'iniciada') {
-                                continue;
-                            }
+                        // OCULTAR la compra que funciona como carrito (la de menor ID por usuario)
+                        if (isset($carritoPorUsuario[$idUsuario]) && $carritoPorUsuario[$idUsuario] === $idCompra) {
+                            continue;
                         }
 
-                        // Calcular total de la compra
-                        $items = (new AbmCompraItem())->buscar(['idcompra' => $compra->getIdCompra()]);
+                        // Obtener estado actual
+                        $estadoObj = $abmEstado->obtenerEstadoActual($idCompra);
+                        $tipoEstado = $estadoObj 
+                            ? $estadoObj->getObjCompraEstadoTipo()->getCeTDescripcion() 
+                            : 'desconocido';
+
+                        // Calcular total
+                        $items = (new AbmCompraItem())->buscar(['idcompra' => $idCompra]);
                         $total = 0;
                         foreach ($items as $item) {
-                            $prod = $item->getObjProducto();
-                            $total += $prod->getProPrecio() * $item->getCiCantidad();
+                            $producto = $item->getObjProducto();
+                            $total += $producto->getProPrecio() * $item->getCiCantidad();
                         }
                     ?>
                         <tr>
-                            <td><strong>#<?= $compra->getIdCompra() ?></strong></td>
+                            <td><strong>#<?= $idCompra ?></strong></td>
                             <td><?= htmlspecialchars($compra->getObjUsuario()->getUsNombre()) ?></td>
                             <td><?= date('d/m/Y H:i', strtotime($compra->getCoFecha())) ?></td>
                             <td>
-                                <span class="badge 
-            <?= $tipoEstado == 'iniciada' ? 'bg-warning' : ($tipoEstado == 'aceptada' ? 'bg-primary' : ($tipoEstado == 'enviada' ? 'bg-success' : 'bg-danger')) ?>">
+                                <span class="badge
+                                    <?= $tipoEstado === 'iniciada' ? 'bg-warning text-dark' :
+                                        ($tipoEstado === 'aceptada' ? 'bg-primary' :
+                                        ($tipoEstado === 'enviada' ? 'bg-success' :
+                                        ($tipoEstado === 'cancelada' ? 'bg-danger' : 'bg-secondary')))
+                                    ?>">
                                     <?= ucfirst($tipoEstado) ?>
                                 </span>
                             </td>
                             <td>$<?= number_format($total, 0, ',', '.') ?></td>
                             <td>
-                                <a href="verCompraAdmin.php?id=<?= $compra->getIdCompra() ?>" class="btn btn-sm btn-info">
-                                    Ver detalle
+                                <a href="verCompraAdmin.php?id=<?= $idCompra ?>" 
+                                   class="btn btn-sm btn-info">
+                                    <i class="bi bi-eye"></i> Ver detalle
                                 </a>
                             </td>
                         </tr>
                     <?php endforeach; ?>
-
                 </tbody>
-
             </table>
         </div>
     <?php endif; ?>
