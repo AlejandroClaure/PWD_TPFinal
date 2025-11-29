@@ -422,7 +422,7 @@ class AbmProducto
         exit;
     }
 
-    
+
   /*
  * cambia la visibilidad del propducto
  *
@@ -430,13 +430,16 @@ class AbmProducto
  */
     public function toggleVisibilidadProducto($session)
     {
+        $valorError = 0;
         // Verificamos sesión (doble chequeo, nunca está de más)
         if (!$session->activa()) {
             header("Location: " . $GLOBALS['VISTA_URL'] . "login/login.php");
+            return $valorError = 0;
             exit;
         }
         if (!$session->esAdmin()) {
             header("Location: " . $GLOBALS['VISTA_URL'] . "error/noAutorizado.php");
+            return $valorError = 1;
             exit;
         }
         $usuario = $session->getUsuario();
@@ -444,6 +447,7 @@ class AbmProducto
         $id = intval($_GET['id'] ?? 0);
         if ($id <= 0) {
             header("Location: ../../menus/gestionMenus.php?ok=0");
+            return $valorError = 2;
             exit;
         }
 
@@ -452,6 +456,7 @@ class AbmProducto
 
         if (!$producto) {
             header("Location: ../../menus/gestionMenus.php?ok=0");
+            return $valorError = 3;
             exit;
         }
 
@@ -460,6 +465,7 @@ class AbmProducto
             : $abm->eliminar($id);
 
         header("Location: ../../menus/gestionMenus.php?toggle=1");
+        return $valorError = 4;
         exit;
     }
 }

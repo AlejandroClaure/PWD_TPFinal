@@ -175,264 +175,158 @@ class AbmCompra
     // CORRECCION DE LOS ACCION DE COMPRA
     // --------------------------------------------------
 
-
-    /*
+/**
  * Agrega un producto al carrito del usuario
  *
- * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
+ * @param int $usuarioId
+ * @param int $idProducto
+ * @param int $cantidad
+ * @return array Resultado de la operación
  */
-    public function agregarCarrito($session)
-    {
-        // Verificamos sesión (doble chequeo, nunca está de más)
-        if (!$session->activa()) {
-            header("Location: " . $GLOBALS['VISTA_URL'] . "login/login.php?error=2");
-            exit;
-        }
-
-        $usuario   = $session->getUsuario();
-        $usuarioId = $usuario->getIdUsuario();
-
-        // Parámetros GET
-        $idProducto = intval($_GET['id'] ?? 0);
-        $cantidad   = intval($_GET['cantidad'] ?? 1);
-        $redirect   = $_GET['redirect'] ?? 'compra/carrito.php';
-
-        // Validación básica
-        if ($idProducto <= 0 || $cantidad <= 0) {
-            header("Location: " . $GLOBALS['VISTA_URL'] . "producto/producto.php?error=1");
-            exit;
-        }
-
-        // Aquí creamos la instancia SOLO cuando la necesitamos
-        $abmCompraItem = new AbmCompraItem();
-
-        // Agregamos el producto al carrito
-        $ok = $abmCompraItem->agregarProducto($usuarioId, $idProducto, $cantidad);
-
-        // Redirección
-        $param = $ok ? 'ok=1' : 'error=3';
-        header("Location: " . $GLOBALS['VISTA_URL'] . $redirect . "?" . $param);
-        exit;
+public function agregarAlCarrito($usuarioId, $idProducto, $cantidad)
+{
+    // Si alguno de los parámetros está mal, devolvemos false directamente (cortito y al pie)
+    if ($idProducto <= 0 || $cantidad <= 0 || $usuarioId <= 0) {
+        return false;
     }
 
+    // Instanciamos el ABM de ítems del carrito
+    $abmItem = new AbmCompraItem();
+    
+    // Intentamos agregar el producto y devolvemos true/false según si salió bien o mal
+    return $abmItem->agregarProducto($usuarioId, $idProducto, $cantidad);
+}
     /*
  * cancela la compra de un producto
  *
- * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
+ * @param $idCompra
  */
-    public function cancelarCompraCarrito($session)
-    {
-        // Verificamos sesión (doble chequeo, nunca está de más)
-        if (!$session->activa() || !$session->tieneRol('cliente')) {
-            header("Location: ../../login/login.php");
-            exit;
-        }
-
-        $idCompra = $_GET['id'] ?? null;
-
-        if (!$idCompra) {
-            header("Location: ../verCompraCliente.php?msg=error_id");
-            exit;
-        }
-
-        $abmEstado = new AbmCompraEstado();
-
-        // 4 = cancelada
-        $ok = $abmEstado->cambiarEstadoCompra($idCompra, 4);
-
-        if ($ok) {
-            header("Location: ../detalleCompra.php?id=$idCompra&msg=cancel_ok");
-        } else {
-            header("Location: ../detalleCompra.php?id=$idCompra&msg=cancel_fail");
-        }
-
-        exit;
+    // Dentro de la clase AbmCompra.php
+public function cancelarCompra($idCompra)
+{
+    // Validación mínima (el id tiene que ser número positivo)
+    if ($idCompra <= 0) {
+        return false;
     }
+
+    $abmEstado = new AbmCompraEstado();
+    // 4 = estado "cancelada" en tu sistema
+    return $abmEstado->cambiarEstadoCompra($idCompra, 4);
+}
 
 
 
     /*
  * elimina un item del carrito
  *
- * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
+ * @param $usuarioId, 
+ * @param $idProducto
  */
-    public function eliminarItemCarrito($session)
-    {
-        // Verificamos sesión (doble chequeo, nunca está de más)
-        if (!$session->activa()) {
-            header("Location: " . $GLOBALS['VISTA_URL'] . "login/login.php?error=2");
-            exit;
-        }
+    // Elimina un producto del carrito del usuario
+public function eliminarDelCarrito($usuarioId, $idProducto)
+{
+    // Si los datos están mal → chau
+    if ($usuarioId <= 0 || $idProducto <= 0) return false;
 
-        $usuario = $session->getUsuario();
-        $usuarioId = $usuario->getIdUsuario();
-
-        $idProducto = intval($_GET['id'] ?? 0);
-        if ($idProducto <= 0) {
-            header("Location: " . $GLOBALS['VISTA_URL'] . "compra/carrito.php?error=1");
-            exit;
-        }
-
-        $abm = new AbmCompraItem();
-        $eliminado = $abm->eliminarProducto($usuarioId, $idProducto);
-
-        $redirect = $_GET['redirect'] ?? 'compra/carrito.php';
-        header("Location: " . $GLOBALS['VISTA_URL'] . $redirect . ($eliminado ? "?ok=2" : "?error=2"));
-        exit;
-    }
+    $abmItem = new AbmCompraItem();
+    // Devuelve true si borró, false si no existía o falló
+    return $abmItem->eliminarProducto($usuarioId, $idProducto);
+}
 
 
     /*
- * finaliza la compra de un producto
+ * Finaliza la compra: crea la compra, transfiere items, genera PDF, etc.
  *
- * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
+ * @param $usuarioId
  */
-    public function finalizarCompraCarrito($session)
-    {
-        // Verificamos sesión (doble chequeo, nunca está de más)
-        if (!$session->activa()) die("No login");
+public function finalizarCompra($usuarioId)
+{
+    if ($usuarioId <= 0) return false;
 
-        $usuario  = $session->getUsuario();
-        $idUsuario = $usuario->getIdUsuario();
-        // 2) Controladores
-        $abmCompra = new AbmCompra();
-        $abmItem   = new AbmCompraItem();
-        $abmEstado = new AbmCompraEstado();
-        // 3) Crear compra 
-        $compra = $abmCompra->alta([
-            "cofecha" => date('Y-m-d H:i:s'),
-            "idusuario" => $idUsuario
-        ]);
-        if (!$compra) die("Error al crear compra.");
-        $idCompraNueva = $compra->getIdCompra();
-        // 4) Transferir items del carrito
-        $ok = $abmItem->transferirCarritoACompra($idUsuario, $idCompraNueva);
-        if (!$ok) die("Error al transferir los items.");
-        // 5) Obtener items reales para PDF
-        $itemsCompra = $abmItem->buscar(['idcompra' => $idCompraNueva]);
-        // 6) PDF comprobante
-        $rutaPDF = $abmCompra->generarComprobantePDF($compra, $itemsCompra);
-        // 7) Estado = iniciada
-        $abmEstado->alta([
-            "idcompra" => $idCompraNueva,
-            "idcompraestadotipo" => COMPRA_ESTADO_INICIADA,
-            "cefechaini" => date("Y-m-d H:i:s")
-        ]);
-        // 8) Vaciar carrito origen
-        $abmItem->vaciarCarrito($idUsuario);
-        $_SESSION['carrito'] = [];
-        // 9) Redirigir
-        header("Location: ../compra_exitosa.php?id=$idCompraNueva");
-        exit;
-    }
+    $abmCompra = new AbmCompra();
+    $abmItem   = new AbmCompraItem();
+    $abmEstado = new AbmCompraEstado();
+
+    // 1) Crear compra nueva
+    $compra = $abmCompra->alta([
+        "cofecha"   => date('Y-m-d H:i:s'),
+        "idusuario" => $usuarioId
+    ]);
+    if (!$compra) return false;
+    $idCompra = $compra->getIdCompra();
+
+    // 2) Transferir items del carrito a la compra
+    if (!$abmItem->transferirCarritoACompra($usuarioId, $idCompra)) return false;
+
+    // 3) Generar PDF comprobante
+    $items = $abmItem->buscar(['idcompra' => $idCompra]);
+    $abmCompra->generarComprobantePDF($compra, $items);
+
+    // 4) Poner estado "iniciada"
+    $abmEstado->alta([
+        "idcompra"           => $idCompra,
+        "idcompraestadotipo" => COMPRA_ESTADO_INICIADA,
+        "cefechaini"         => date("Y-m-d H:i:s")
+    ]);
+
+    // 5) Vaciar carrito y sesión
+    $abmItem->vaciarCarrito($usuarioId);
+    $_SESSION['carrito'] = [];
+
+    return $idCompra; // devuelve el ID de la compra creada
+}
 
 
     /*
  * resta en 1 stock de un producto
  *
- * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
+ * @param $usuarioId, 
+ * @param $idProducto
  */
-    public function restarStockCarrito($session)
-    {
-        // Verificamos sesión (doble chequeo, nunca está de más)
-        if (!$session->activa()) {
-            header("Location: " . $GLOBALS['VISTA_URL'] . "login/login.php?error=2");
-            exit;
-        }
-
-        $usuario = $session->getUsuario();
-        $usuarioId = $usuario->getIdUsuario();
-
-        $idProducto = intval($_GET['id'] ?? 0);
-        if ($idProducto <= 0) {
-            header("Location: " . $GLOBALS['VISTA_URL'] . "compra/carrito.php?error=1");
-            exit;
-        }
-
-        $abm = new AbmCompraItem();
-        $abm->modificarCantidad($usuarioId, $idProducto, 'restar');
-
-        $redirect = $_GET['redirect'] ?? 'compra/carrito.php';
-        header("Location: " . $GLOBALS['VISTA_URL'] . $redirect);
-        exit;
-    }
+    public function restarCantidad($usuarioId, $idProducto)
+{
+    if ($usuarioId <= 0 || $idProducto <= 0) return false;
+    $abmItem = new AbmCompraItem();
+    return $abmItem->modificarCantidad($usuarioId, $idProducto, 'restar');
+}
 
     /*
  * suma en 1 stock de un producto
  *
- * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
+ * @param $usuarioId, 
+ * @param $idProducto
  */
-    public function sumarStockCarrito($session)
-    {
-        // Verificamos sesión (doble chequeo, nunca está de más)
-        if (!$session->activa()) {
-            header("Location: " . $GLOBALS['VISTA_URL'] . "login/login.php?error=2");
-            exit;
-        }
-
-        $usuario = $session->getUsuario();
-        $usuarioId = $usuario->getIdUsuario();
-
-        $idProducto = intval($_GET['id'] ?? 0);
-        if ($idProducto <= 0) {
-            header("Location: " . $GLOBALS['VISTA_URL'] . "compra/carrito.php?error=1");
-            exit;
-        }
-
-        $abm = new AbmCompraItem();
-        $abm->modificarCantidad($usuarioId, $idProducto, 'sumar');
-
-        $redirect = $_GET['redirect'] ?? 'compra/carrito.php';
-        header("Location: " . $GLOBALS['VISTA_URL'] . $redirect);
-        exit;
-    }
+    public function sumarCantidad($usuarioId, $idProducto)
+{
+    if ($usuarioId <= 0 || $idProducto <= 0) return false;
+    $abmItem = new AbmCompraItem();
+    return $abmItem->modificarCantidad($usuarioId, $idProducto, 'sumar');
+}
 
     /*
  * vacia carrito de compra
  *
  * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
  */
-    public function vaciarCarrito($session)
-    {
-        // Verificamos sesión (doble chequeo, nunca está de más)
-        if (!$session->activa()) {
-            header("Location: " . $GLOBALS['VISTA_URL'] . "login/login.php?error=2");
-            exit;
-        }
-
-        $usuarioId = $session->getUsuario()->getIdUsuario();
-
-        // Vaciar carrito
-        $abm = new AbmCompraItem();
-        $abm->vaciarCarrito($usuarioId);
-
-        // Redirigir
-        header("Location: " . $GLOBALS['VISTA_URL'] . "compra/carrito.php?vaciado=1");
-        exit;
-    }
+    public function vaciarCarritoUsuario($usuarioId)
+{
+    if ($usuarioId <= 0) return false;
+    $abmItem = new AbmCompraItem();
+    $abmItem->vaciarCarrito($usuarioId);
+    $_SESSION['carrito'] = [];
+    return true;
+}
 
     /*
  * cambiar estado de compra
  *
- * @param Session $session  Objeto sesión ya iniciado desde el archivo de acción
+ * @param $idCompra, 
+ * @param $nuevoEstado
  */
-    public function cambioEstadoCompra($session)
-    {
-        // Verificamos sesión (doble chequeo, nunca está de más)
-        if (!$session->activa() || !$session->tieneRol('admin')) {
-            exit;
-        }
-
-        $idCompra = intval($_POST['idcompra'] ?? 0);
-        $nuevoEstado = intval($_POST['nuevoestado'] ?? 0);
-
-        if ($idCompra > 0 && in_array($nuevoEstado, [2, 3, 4, 5])) {
-
-            $abmEstado = new AbmCompraEstado();
-            $abmEstado->cambiarEstadoCompra($idCompra, $nuevoEstado);
-        }
-
-        header("Location: ../verCompraAdmin.php?id=" . $idCompra);
-        exit;
-    }
+    public function cambiarEstadoCompra($idCompra, $nuevoEstado)
+{
+    if ($idCompra <= 0 || !in_array($nuevoEstado, [2,3,4,5])) return false;
+    $abmEstado = new AbmCompraEstado();
+    return $abmEstado->cambiarEstadoCompra($idCompra, $nuevoEstado);
+}
 }
